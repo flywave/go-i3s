@@ -1,6 +1,7 @@
 #include "i3s_api.h"
 
 #include <i3s/i3s_writer.h>
+#include <i3s/i3s_common_.h>
 #include <utils/utl_slpk_writer_api.h>
 
 #ifdef __cplusplus
@@ -13,6 +14,14 @@ struct _i3s_material_data_t {
 
 struct _i3s_mesh_data_t {
   i3slib::i3s::Mesh_data data;
+};
+
+struct _i3s_attribute_buffer_t {
+  i3slib::i3s::Attribute_buffer::Ptr data;
+};
+ 
+struct _i3s_geometry_buffer_t {
+  i3slib::i3s::Geometry_buffer::Ptr data;
 };
 
 struct _i3s_texture_buffer_t {

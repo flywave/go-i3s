@@ -20,8 +20,8 @@ const (
 	GF_NOT_SET      = GeometryFormat(0)
 	GF_LEGACY       = GeometryFormat(1)
 	GF_POINT_LEGACY = GeometryFormat(2)
-	GF_DRACO        = GeometryFormat(3)
-	GF_LEPCC        = GeometryFormat(4)
+	GF_DRACO        = GeometryFormat(4)
+	GF_LEPCC        = GeometryFormat(8)
 )
 
 type ImageFormat C.uint
@@ -203,9 +203,9 @@ const (
 type AttribOrdering C.int
 
 const (
-	AO_ATTRIBVALUES = AttribOrdering(0)
-	AO_BYTECOUNTS   = AttribOrdering(1)
-	AO_OBJECTIDS    = AttribOrdering(1)
+	AO_ATTRIB_VALUES = AttribOrdering(0)
+	AO_BYTE_COUNTS   = AttribOrdering(1)
+	AO_OBJECT_IDS    = AttribOrdering(1)
 )
 
 type CompressedGeometryFormat C.int
@@ -258,7 +258,7 @@ const (
 type AttributeStorageInfoEncoding C.int
 
 const (
-	ASE_EMBEDDEDELEVATION = AttributeStorageInfoEncoding(0)
+	ASE_EMBEDDED_ELEVATION = AttributeStorageInfoEncoding(0)
 	ASE_LEPCC_XYZ         = AttributeStorageInfoEncoding(1)
 	ASE_LEPCC_RGB         = AttributeStorageInfoEncoding(2)
 	ASE_LEPCC_INTENSITY   = AttributeStorageInfoEncoding(3)
@@ -288,20 +288,20 @@ const (
 	HU_METER           = HeightUnit(0)
 	HU_USFOOT          = HeightUnit(1)
 	HU_FOOT            = HeightUnit(2)
-	HU_CLARKEFOOT      = HeightUnit(3)
-	HU_CLARKEYARD      = HeightUnit(4)
-	HU_CLARKELINK      = HeightUnit(5)
-	HU_SEARSYARD       = HeightUnit(6)
-	HU_SEARSFOOT       = HeightUnit(7)
-	HU_SEARSCHAIN      = HeightUnit(8)
-	HU_BENOITCHAIN     = HeightUnit(9)
-	HU_INDIANYARD      = HeightUnit(10)
-	HU_INDIAN1937YARD  = HeightUnit(11)
-	HU_GOLDCOASTFOOT   = HeightUnit(12)
-	HU_SEARSTRUNCCHAIN = HeightUnit(13)
-	HU_USINCH          = HeightUnit(14)
-	HU_USMILE          = HeightUnit(15)
-	HU_USYARD          = HeightUnit(16)
+	HU_CLARKE_FOOT      = HeightUnit(3)
+	HU_CLARKE_YARD      = HeightUnit(4)
+	HU_CLARKE_LINK      = HeightUnit(5)
+	HU_SEARS_YARD       = HeightUnit(6)
+	HU_SEARS_FOOT       = HeightUnit(7)
+	HU_SEARS_CHAIN      = HeightUnit(8)
+	HU_BENOIT_CHAIN     = HeightUnit(9)
+	HU_INDIAN_YARD      = HeightUnit(10)
+	HU_INDIAN_1937_YARD  = HeightUnit(11)
+	HU_GOLD_COAST_FOOT   = HeightUnit(12)
+	HU_SEARS_TRUNC_CHAIN = HeightUnit(13)
+	HU_US_INCH          = HeightUnit(14)
+	HU_US_MILE          = HeightUnit(15)
+	HU_US_YARD          = HeightUnit(16)
 	HU_MILLIMETER      = HeightUnit(17)
 	HU_DECIMETER       = HeightUnit(18)
 	HU_CENTIMETER      = HeightUnit(19)
@@ -379,6 +379,48 @@ const (
 	VEM_NOT_SET        = VerticalExagMode(2)
 )
 
+type AttribFlag C.int
+const (
+	AF_POS = AttribFlag(1)
+	AF_NORMAL = AttribFlag(2)
+	AF_UV0 = AttribFlag(4)
+	AF_UV1 = AttribFlag(16)
+	AF_COLOR = AttribFlag(32)
+	AF_REGION = AttribFlag(64)
+	AF_FEATUREID = AttribFlag(128)
+	AF_LEGACYNOREGION = AF_POS | AF_NORMAL | AF_UV0 | AF_COLOR | AF_FEATUREID
+	AF_LEGACYWITHREGION = AF_LEGACYNOREGION | AF_REGION
+)
+
+type TextureSemantic C.int
+const (
+	TS_BASE_COLOR = TextureSemantic(0)
+	TS_METALLIC_ROUGHNESS = TextureSemantic(1)
+	TS_DIFFUSE_TEXTURE = TextureSemantic(2)
+	TS_EMISSIVE_TEXTURE = TextureSemantic(3)
+	TS_NORMAL_MAP = TextureSemantic(4)
+	TS_OCCLUSION_MAP = TextureSemantic(5)
+	TS_NOT_SET = TextureSemantic(6)
+)
+
+type AlphaStatus C.int
+const (
+	AS_OPAQUE = AlphaStatus(0)
+	AS_MASK = AlphaStatus(1)
+	AS_BLEND = AlphaStatus(8)
+	AS_MASK_OR_BLEND = AlphaStatus(-2)
+	AS_NOT_SET = AlphaStatus(-1)
+)
+
+type WrapMode C.int
+const (
+	WM_NONE = WrapMode(0)
+	WM_WRAP_X = WrapMode(1)
+	WM_WRAP_Y = WrapMode(2)
+	WM_WRAP_XY = WM_WRAP_X | WM_WRAP_Y
+	WM_NOT_SET = WrapMode(4)
+)
+
 type AttributeMeta struct {
 	Key   string
 	Name  string
@@ -387,4 +429,68 @@ type AttributeMeta struct {
 
 type AttributeDefinition struct {
 	Meta AttributeMeta
+	Type DataType
+	Encoding AttributeStorageInfoEncoding
 }
+
+type SpatialReference struct {
+	WKID int32
+	LastWKID int32
+	VesID int32
+	LastVesID int32
+	WKT string
+}
+
+type HeightModelInfo struct {
+	HModel HeightModel
+	VertCrs string
+	HUnit HeightUnit
+}
+
+type LayerMeta struct {
+	Type LayerType
+	Name string
+	Desc string
+	Copyright string
+	SR SpatialReference
+	Uid string
+	DrawingInfo string
+	ElevationInfo string
+	PopupInfo string
+	Timestamp uint32
+	NRF NormalReferenceFrame
+	HModeInfo HeightModelInfo
+}
+
+type TextureMeta struct {
+	Mip0Width int32
+	Mip0Height int32
+	MipCount int32
+	UVSet int32
+	AStatus AlphaStatus
+	WMode WrapMode
+	Format ImageFormat
+	IsAtlas bool
+}
+
+type GeometryCompressionFlags C.uint
+type GeometryCompression CompressedGeometryFormat
+
+type GPUTextureCompression C.uint
+const (
+	TC_NOT_SET            = ImageFormat(0)
+	TC_JPG                = ImageFormat(1)
+	TC_PNG                = ImageFormat(2)
+	TC_DDS                = ImageFormat(4)
+	TC_KTX                = ImageFormat(8)
+	TC_RAW_RGBA8          = ImageFormat(16)
+	TC_RAW_RGB8           = ImageFormat(32)
+	TC_DEFAULT            = TC_JPG | TC_PNG
+	TC_UNCOMPRESSED       = TC_RAW_RGBA8 | TC_RAW_RGB8
+	TC_DESKTOP            = TC_DEFAULT | TC_DDS
+	TC_ALL_COMPRESSED     = TC_DESKTOP | TC_KTX
+	TC_NOT_GPU_COMPRESSED = TC_UNCOMPRESSED | TC_JPG | TC_PNG
+	TC_DXT_BC_ALL = TC_DDS
+	TC_ETC_2 = TC_KTX
+	TC_DESKTOP = TC_DXT_BC_ALL
+)
