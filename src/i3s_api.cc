@@ -23,7 +23,7 @@ struct _i3s_mesh_data_t {
 };
 
 struct _i3s_texture_buffer_t {
-  i3slib::i3s::Texture_buffer::Ptr ptr;
+  i3slib::i3s::Texture_buffer buf;
 };
 
 struct _i3s_ctx_properties_t {
@@ -63,7 +63,7 @@ struct _i3s_attribute_meta_t {
 };
 
 struct _i3s_texture_meta_t {
-  i3slib::i3s::Texture_meta meta;
+  i3slib::i3s::Texture_meta *meta;
 };
 
 FLYWAVE_I3S_API i3s_ctx_properties_t *ctx_properties_create() {
@@ -364,50 +364,86 @@ FLYWAVE_I3S_API void material_data_free(i3s_material_data_t *md) {
 
 FLYWAVE_I3S_API void
 material_data_set_material_properties_alpha_mode(i3s_material_data_t *md,
-                                                 int alpha_mode) {}
+                                                 int alpha_mode) {
+  md->data->properties.alpha_mode =
+      static_cast<i3slib::i3s::Alpha_mode>(alpha_mode);
+}
 
 FLYWAVE_I3S_API void
 material_data_set_material_properties_alpha_cut_off(i3s_material_data_t *md,
-                                                    int alpha_cut_off) {}
+                                                    int alpha_cut_off) {
+  md->data->properties.alpha_cut_off = alpha_cut_off;
+}
 
 FLYWAVE_I3S_API void
 material_data_set_material_properties_double_sided(i3s_material_data_t *md,
-                                                   bool double_sided) {}
+                                                   bool double_sided) {
+  md->data->properties.double_sided = double_sided;
+}
 
 FLYWAVE_I3S_API void
 material_data_set_material_properties_emissive_factor(i3s_material_data_t *md,
-                                                      float *emissive_factor) {}
+                                                      float *emissive_factor) {
+  md->data->properties.emissive_factor.x = emissive_factor[0];
+  md->data->properties.emissive_factor.y = emissive_factor[1];
+  md->data->properties.emissive_factor.z = emissive_factor[2];
+}
 
 FLYWAVE_I3S_API void
 material_data_set_material_properties_cull_face(i3s_material_data_t *md,
-                                                int cull_face) {}
+                                                int cull_face) {
+  md->data->properties.cull_face =
+      static_cast<i3slib::i3s::Face_culling_mode>(cull_face);
+}
 
 FLYWAVE_I3S_API void material_data_set_metallic_roughness_base_color_factor(
-    i3s_material_data_t *md, float *base_color_factor) {}
+    i3s_material_data_t *md, float *base_color_factor) {
+  md->data->metallic_roughness.base_color_factor.x = base_color_factor[0];
+  md->data->metallic_roughness.base_color_factor.y = base_color_factor[1];
+  md->data->metallic_roughness.base_color_factor.z = base_color_factor[2];
+  md->data->metallic_roughness.base_color_factor.w = base_color_factor[3];
+}
 
 FLYWAVE_I3S_API void
 material_data_set_metallic_roughness_metallic_factor(i3s_material_data_t *md,
-                                                     float metallic_factor) {}
+                                                     float metallic_factor) {
+  md->data->metallic_roughness.metallic_factor = metallic_factor;
+}
 
 FLYWAVE_I3S_API void
 material_data_set_metallic_roughness_roughness_factor(i3s_material_data_t *md,
-                                                      float roughness_factor) {}
+                                                      float roughness_factor) {
+  md->data->metallic_roughness.roughness_factor = roughness_factor;
+}
 
 FLYWAVE_I3S_API void material_data_append_metallic_roughness_base_color_tex(
-    i3s_material_data_t *md, i3s_texture_buffer_t *tex) {}
+    i3s_material_data_t *md, i3s_texture_buffer_t *tex) {
+  md->data->metallic_roughness.base_color_tex.emplace_back(tex->buf);
+}
 
 FLYWAVE_I3S_API void
 material_data_append_metallic_roughness_metallic_roughness_tex(
-    i3s_material_data_t *md, i3s_texture_buffer_t *tex) {}
+    i3s_material_data_t *md, i3s_texture_buffer_t *tex) {
+  md->data->metallic_roughness.metallic_roughness_tex.emplace_back(tex->buf);
+}
 
 FLYWAVE_I3S_API void
 material_data_append_normal_map_tex(i3s_material_data_t *md,
-                                    i3s_texture_buffer_t *tex) {}
+                                    i3s_texture_buffer_t *tex) {
+  md->data->normal_map_tex.emplace_back(tex->buf);
+}
 
 FLYWAVE_I3S_API i3s_texture_buffer_t *texture_buffer_create(int width,
                                                             int height,
                                                             int channel_count,
-                                                            const char *data) {}
+                                                            const char *data) {
+  auto ptr = new i3s_texture_buffer_t{};
+  if (i3slib::i3s::create_texture_from_image(width, height, channel_count, data,
+                                             ptr->buf))
+    return ptr;
+  delete ptr;
+  return nullptr;
+}
 
 FLYWAVE_I3S_API void texture_buffer_free(i3s_texture_buffer_t *nd) {
   if (nd) {
@@ -416,25 +452,57 @@ FLYWAVE_I3S_API void texture_buffer_free(i3s_texture_buffer_t *nd) {
 }
 
 FLYWAVE_I3S_API i3s_texture_meta_t *
-texture_buffer_get_meta(i3s_texture_buffer_t *nd) {}
+texture_buffer_get_meta(i3s_texture_buffer_t *nd) {
+  return new i3s_texture_meta_t{&nd->buf.meta};
+}
 
-FLYWAVE_I3S_API void texture_meta_free(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_free(i3s_texture_meta_t *nd) {
+  if (nd) {
+    delete nd;
+  }
+}
 
-FLYWAVE_I3S_API void texture_meta_set_mip0_width(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_mip0_width(i3s_texture_meta_t *nd,
+                                                 int mip0_width) {
+  nd->meta->mip0_width = mip0_width;
+}
 
-FLYWAVE_I3S_API void texture_meta_set_mip0_height(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_mip0_height(i3s_texture_meta_t *nd,
+                                                  int mip0_height) {
+  nd->meta->mip0_height = mip0_height;
+}
 
-FLYWAVE_I3S_API void texture_meta_set_mip_count(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_mip_count(i3s_texture_meta_t *nd,
+                                                int mip_count) {
+  nd->meta->mip_count = mip_count;
+}
 
-FLYWAVE_I3S_API void texture_meta_set_uv_set(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_uv_set(i3s_texture_meta_t *nd,
+                                             int uv_set) {
+  nd->meta->uv_set = uv_set;
+}
 
-FLYWAVE_I3S_API void texture_meta_set_alpha_status(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_alpha_status(i3s_texture_meta_t *nd,
+                                                   int alpha_status) {
+  nd->meta->alpha_status =
+      static_cast<i3slib::i3s::Texture_meta::Alpha_status>(alpha_status);
+}
 
-FLYWAVE_I3S_API void texture_meta_set_wrap_mode(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_wrap_mode(i3s_texture_meta_t *nd,
+                                                int wrap_mode) {
+  nd->meta->wrap_mode =
+      static_cast<i3slib::i3s::Texture_meta::Wrap_mode>(wrap_mode);
+}
 
-FLYWAVE_I3S_API void texture_meta_set_format(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_format(i3s_texture_meta_t *nd,
+                                             int format) {
+  nd->meta->format = static_cast<i3slib::i3s::Image_format>(format);
+}
 
-FLYWAVE_I3S_API void texture_meta_set_is_atlas(i3s_texture_meta_t *nd) {}
+FLYWAVE_I3S_API void texture_meta_set_is_atlas(i3s_texture_meta_t *nd,
+                                               _Bool is_atlas) {
+  nd->meta->is_atlas = is_atlas;
+}
 
 FLYWAVE_I3S_API void node_data_set_lod_threshold(i3s_node_data_t *nd,
                                                  double lod_threshold) {

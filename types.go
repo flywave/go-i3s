@@ -3,13 +3,13 @@ package i3s
 // #include <stdlib.h>
 import "C"
 
-type NodeId C.size_t
-type LayerId C.size_t
+type NodeID C.size_t
+type LayerID C.size_t
 
 type AttribIndex C.int
-type AttribSchemaId C.int
-type TextureId C.int
-type GeometryId C.int
+type AttribSchemaID C.int
+type TextureID C.int
+type GeometryID C.int
 
 type Rgba8 [4]C.uchar
 type UVRegion [4]C.uchar
@@ -425,58 +425,6 @@ const (
 	WM_NOT_SET = WrapMode(4)
 )
 
-type AttributeMeta struct {
-	Key   string
-	Name  string
-	Alias string
-}
-
-type AttributeDefinition struct {
-	Meta     AttributeMeta
-	Type     DataType
-	Encoding AttributeStorageInfoEncoding
-}
-
-type SpatialReference struct {
-	WKID      int32
-	LastWKID  int32
-	VesID     int32
-	LastVesID int32
-	WKT       string
-}
-
-type HeightModelInfo struct {
-	HModel  HeightModel
-	VertCrs string
-	HUnit   HeightUnit
-}
-
-type LayerMeta struct {
-	Type          LayerType
-	Name          string
-	Desc          string
-	Copyright     string
-	SR            SpatialReference
-	Uid           string
-	DrawingInfo   string
-	ElevationInfo string
-	PopupInfo     string
-	Timestamp     uint32
-	NRF           NormalReferenceFrame
-	HModeInfo     HeightModelInfo
-}
-
-type TextureMeta struct {
-	Mip0Width  int32
-	Mip0Height int32
-	MipCount   int32
-	UVSet      int32
-	AStatus    AlphaStatus
-	WMode      WrapMode
-	Format     ImageFormat
-	IsAtlas    bool
-}
-
 type GeometryCompressionFlags C.uint
 type GeometryCompression CompressedGeometryFormat
 
@@ -492,7 +440,6 @@ const (
 	TC_RAW_RGB8           = ImageFormat(32)
 	TC_DEFAULT            = TC_JPG | TC_PNG
 	TC_UNCOMPRESSED       = TC_RAW_RGBA8 | TC_RAW_RGB8
-	TC_DESKTOP            = TC_DEFAULT | TC_DDS
 	TC_ALL_COMPRESSED     = TC_DESKTOP | TC_KTX
 	TC_NOT_GPU_COMPRESSED = TC_UNCOMPRESSED | TC_JPG | TC_PNG
 	TC_DXT_BC_ALL         = TC_DDS

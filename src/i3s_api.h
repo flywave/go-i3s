@@ -189,14 +189,22 @@ FLYWAVE_I3S_API i3s_texture_meta_t *
 texture_buffer_get_meta(i3s_texture_buffer_t *nd);
 FLYWAVE_I3S_API void texture_meta_free(i3s_texture_meta_t *nd);
 
-FLYWAVE_I3S_API void texture_meta_set_mip0_width(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_mip0_height(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_mip_count(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_uv_set(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_alpha_status(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_wrap_mode(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_format(i3s_texture_meta_t *nd);
-FLYWAVE_I3S_API void texture_meta_set_is_atlas(i3s_texture_meta_t *nd);
+FLYWAVE_I3S_API void texture_meta_set_mip0_width(i3s_texture_meta_t *nd,
+                                                 int mip0_width);
+FLYWAVE_I3S_API void texture_meta_set_mip0_height(i3s_texture_meta_t *nd,
+                                                  int mip0_height);
+FLYWAVE_I3S_API void texture_meta_set_mip_count(i3s_texture_meta_t *nd,
+                                                int mip_count);
+FLYWAVE_I3S_API void texture_meta_set_uv_set(i3s_texture_meta_t *nd,
+                                             int uv_set);
+FLYWAVE_I3S_API void texture_meta_set_alpha_status(i3s_texture_meta_t *nd,
+                                                   int alpha_status);
+FLYWAVE_I3S_API void texture_meta_set_wrap_mode(i3s_texture_meta_t *nd,
+                                                int wrap_mode);
+FLYWAVE_I3S_API void texture_meta_set_format(i3s_texture_meta_t *nd,
+                                             int format);
+FLYWAVE_I3S_API void texture_meta_set_is_atlas(i3s_texture_meta_t *nd,
+                                               _Bool is_atlas);
 
 FLYWAVE_I3S_API i3s_raw_mesh_t *raw_mesh_create();
 FLYWAVE_I3S_API void raw_mesh_free(i3s_raw_mesh_t *nd);
