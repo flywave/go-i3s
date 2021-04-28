@@ -6,6 +6,6 @@ package i3s
 // #cgo CXXFLAGS: -I ./lib
 import "C"
 
-type CtxProperties struct {
-	m *C.struct__i3s_ctx_properties_t
+type CartesianTransformation struct {
+	m *C.struct__i3s_cartesian_transformation_t
 }

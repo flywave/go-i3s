@@ -21,12 +21,16 @@ type RawPoints struct {
 	m *C.struct__i3s_raw_points_t
 }
 
-type CartesianTransformation struct {
-	m *C.struct__i3s_cartesian_transformation_t
-}
-
 type WriterContext struct {
 	m *C.struct__i3s_writer_context_t
+}
+
+type LayerMeta struct {
+	m *C.struct__i3s_layer_meta_t
+}
+
+type AttributeMeta struct {
+	m *C.struct__i3s_attribute_meta_t
 }
 
 type LayerWriter struct {

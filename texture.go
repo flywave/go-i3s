@@ -9,3 +9,7 @@ import "C"
 type TextureBuffer struct {
 	m *C.struct__i3s_texture_buffer_t
 }
+
+type TextureMeta struct {
+	m *C.struct__i3s_texture_meta_t
+}
