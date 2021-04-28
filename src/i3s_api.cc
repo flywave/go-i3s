@@ -24,7 +24,7 @@ struct _i3s_ctx_properties_t {
 };
 
 struct _i3s_context_t {
-  i3slib::i3s::Context ctx;
+  i3slib::i3s::Context::Ptr ctx;
 };
 
 struct _i3s_writer_context_t {
@@ -32,7 +32,7 @@ struct _i3s_writer_context_t {
 };
 
 struct _i3s_layer_writer_t {
-  i3slib::i3s::Layer_writer::Ptr writer;
+  i3slib::i3s::Layer_writer::Ptr ptr;
 };
 
 struct _i3s_node_data_t {
@@ -52,7 +52,7 @@ struct _i3s_cartesian_transformation_t {
 };
 
 struct _i3s_slpk_writer_t {
-  i3slib::utl::Slpk_writer::Ptr writer;
+  i3slib::utl::Slpk_writer::Ptr ptr;
 };
 
 #ifdef __cplusplus
