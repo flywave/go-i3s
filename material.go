@@ -1,19 +1,19 @@
 package i3s
 
 type MetallicRoughness struct {
-	BaseColorFactor [4]float32
-	MetallicFactor float32
-	RoughnessFactor float32
-	BaseColorTex []TextureBuffer
+	BaseColorFactor      [4]float32
+	MetallicFactor       float32
+	RoughnessFactor      float32
+	BaseColorTex         []TextureBuffer
 	MetallicRoughnessTex []TextureBuffer
 }
 
 type MaterialProperties struct {
-	AMode AlphaMode
-	ACutOff int32
-	DoubleSided bool
+	AMode          AlphaMode
+	ACutOff        int32
+	DoubleSided    bool
 	EmissiveFactor [3]float32
-	CullFace FaceCullingMode
+	CullFace       FaceCullingMode
 }
 
 type MaterialData struct {

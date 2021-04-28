@@ -259,10 +259,10 @@ type AttributeStorageInfoEncoding C.int
 
 const (
 	ASE_EMBEDDED_ELEVATION = AttributeStorageInfoEncoding(0)
-	ASE_LEPCC_XYZ         = AttributeStorageInfoEncoding(1)
-	ASE_LEPCC_RGB         = AttributeStorageInfoEncoding(2)
-	ASE_LEPCC_INTENSITY   = AttributeStorageInfoEncoding(3)
-	ASE_NOT_SET           = AttributeStorageInfoEncoding(4)
+	ASE_LEPCC_XYZ          = AttributeStorageInfoEncoding(1)
+	ASE_LEPCC_RGB          = AttributeStorageInfoEncoding(2)
+	ASE_LEPCC_INTENSITY    = AttributeStorageInfoEncoding(3)
+	ASE_NOT_SET            = AttributeStorageInfoEncoding(4)
 )
 
 type BslFilterMode C.int
@@ -285,28 +285,28 @@ const (
 type HeightUnit C.int
 
 const (
-	HU_METER           = HeightUnit(0)
-	HU_USFOOT          = HeightUnit(1)
-	HU_FOOT            = HeightUnit(2)
-	HU_CLARKE_FOOT      = HeightUnit(3)
-	HU_CLARKE_YARD      = HeightUnit(4)
-	HU_CLARKE_LINK      = HeightUnit(5)
-	HU_SEARS_YARD       = HeightUnit(6)
-	HU_SEARS_FOOT       = HeightUnit(7)
-	HU_SEARS_CHAIN      = HeightUnit(8)
-	HU_BENOIT_CHAIN     = HeightUnit(9)
-	HU_INDIAN_YARD      = HeightUnit(10)
+	HU_METER             = HeightUnit(0)
+	HU_USFOOT            = HeightUnit(1)
+	HU_FOOT              = HeightUnit(2)
+	HU_CLARKE_FOOT       = HeightUnit(3)
+	HU_CLARKE_YARD       = HeightUnit(4)
+	HU_CLARKE_LINK       = HeightUnit(5)
+	HU_SEARS_YARD        = HeightUnit(6)
+	HU_SEARS_FOOT        = HeightUnit(7)
+	HU_SEARS_CHAIN       = HeightUnit(8)
+	HU_BENOIT_CHAIN      = HeightUnit(9)
+	HU_INDIAN_YARD       = HeightUnit(10)
 	HU_INDIAN_1937_YARD  = HeightUnit(11)
 	HU_GOLD_COAST_FOOT   = HeightUnit(12)
 	HU_SEARS_TRUNC_CHAIN = HeightUnit(13)
-	HU_US_INCH          = HeightUnit(14)
-	HU_US_MILE          = HeightUnit(15)
-	HU_US_YARD          = HeightUnit(16)
-	HU_MILLIMETER      = HeightUnit(17)
-	HU_DECIMETER       = HeightUnit(18)
-	HU_CENTIMETER      = HeightUnit(19)
-	HU_KILOMETER       = HeightUnit(20)
-	HU_NOT_SET         = HeightUnit(21)
+	HU_US_INCH           = HeightUnit(14)
+	HU_US_MILE           = HeightUnit(15)
+	HU_US_YARD           = HeightUnit(16)
+	HU_MILLIMETER        = HeightUnit(17)
+	HU_DECIMETER         = HeightUnit(18)
+	HU_CENTIMETER        = HeightUnit(19)
+	HU_KILOMETER         = HeightUnit(20)
+	HU_NOT_SET           = HeightUnit(21)
 )
 
 type Continuity C.int
@@ -380,43 +380,47 @@ const (
 )
 
 type AttribFlag C.int
+
 const (
-	AF_POS = AttribFlag(1)
-	AF_NORMAL = AttribFlag(2)
-	AF_UV0 = AttribFlag(4)
-	AF_UV1 = AttribFlag(16)
-	AF_COLOR = AttribFlag(32)
-	AF_REGION = AttribFlag(64)
-	AF_FEATUREID = AttribFlag(128)
-	AF_LEGACYNOREGION = AF_POS | AF_NORMAL | AF_UV0 | AF_COLOR | AF_FEATUREID
+	AF_POS              = AttribFlag(1)
+	AF_NORMAL           = AttribFlag(2)
+	AF_UV0              = AttribFlag(4)
+	AF_UV1              = AttribFlag(16)
+	AF_COLOR            = AttribFlag(32)
+	AF_REGION           = AttribFlag(64)
+	AF_FEATUREID        = AttribFlag(128)
+	AF_LEGACYNOREGION   = AF_POS | AF_NORMAL | AF_UV0 | AF_COLOR | AF_FEATUREID
 	AF_LEGACYWITHREGION = AF_LEGACYNOREGION | AF_REGION
 )
 
 type TextureSemantic C.int
+
 const (
-	TS_BASE_COLOR = TextureSemantic(0)
+	TS_BASE_COLOR         = TextureSemantic(0)
 	TS_METALLIC_ROUGHNESS = TextureSemantic(1)
-	TS_DIFFUSE_TEXTURE = TextureSemantic(2)
-	TS_EMISSIVE_TEXTURE = TextureSemantic(3)
-	TS_NORMAL_MAP = TextureSemantic(4)
-	TS_OCCLUSION_MAP = TextureSemantic(5)
-	TS_NOT_SET = TextureSemantic(6)
+	TS_DIFFUSE_TEXTURE    = TextureSemantic(2)
+	TS_EMISSIVE_TEXTURE   = TextureSemantic(3)
+	TS_NORMAL_MAP         = TextureSemantic(4)
+	TS_OCCLUSION_MAP      = TextureSemantic(5)
+	TS_NOT_SET            = TextureSemantic(6)
 )
 
 type AlphaStatus C.int
+
 const (
-	AS_OPAQUE = AlphaStatus(0)
-	AS_MASK = AlphaStatus(1)
-	AS_BLEND = AlphaStatus(8)
+	AS_OPAQUE        = AlphaStatus(0)
+	AS_MASK          = AlphaStatus(1)
+	AS_BLEND         = AlphaStatus(8)
 	AS_MASK_OR_BLEND = AlphaStatus(-2)
-	AS_NOT_SET = AlphaStatus(-1)
+	AS_NOT_SET       = AlphaStatus(-1)
 )
 
 type WrapMode C.int
+
 const (
-	WM_NONE = WrapMode(0)
-	WM_WRAP_X = WrapMode(1)
-	WM_WRAP_Y = WrapMode(2)
+	WM_NONE    = WrapMode(0)
+	WM_WRAP_X  = WrapMode(1)
+	WM_WRAP_Y  = WrapMode(2)
 	WM_WRAP_XY = WM_WRAP_X | WM_WRAP_Y
 	WM_NOT_SET = WrapMode(4)
 )
@@ -428,55 +432,56 @@ type AttributeMeta struct {
 }
 
 type AttributeDefinition struct {
-	Meta AttributeMeta
-	Type DataType
+	Meta     AttributeMeta
+	Type     DataType
 	Encoding AttributeStorageInfoEncoding
 }
 
 type SpatialReference struct {
-	WKID int32
-	LastWKID int32
-	VesID int32
+	WKID      int32
+	LastWKID  int32
+	VesID     int32
 	LastVesID int32
-	WKT string
+	WKT       string
 }
 
 type HeightModelInfo struct {
-	HModel HeightModel
+	HModel  HeightModel
 	VertCrs string
-	HUnit HeightUnit
+	HUnit   HeightUnit
 }
 
 type LayerMeta struct {
-	Type LayerType
-	Name string
-	Desc string
-	Copyright string
-	SR SpatialReference
-	Uid string
-	DrawingInfo string
+	Type          LayerType
+	Name          string
+	Desc          string
+	Copyright     string
+	SR            SpatialReference
+	Uid           string
+	DrawingInfo   string
 	ElevationInfo string
-	PopupInfo string
-	Timestamp uint32
-	NRF NormalReferenceFrame
-	HModeInfo HeightModelInfo
+	PopupInfo     string
+	Timestamp     uint32
+	NRF           NormalReferenceFrame
+	HModeInfo     HeightModelInfo
 }
 
 type TextureMeta struct {
-	Mip0Width int32
+	Mip0Width  int32
 	Mip0Height int32
-	MipCount int32
-	UVSet int32
-	AStatus AlphaStatus
-	WMode WrapMode
-	Format ImageFormat
-	IsAtlas bool
+	MipCount   int32
+	UVSet      int32
+	AStatus    AlphaStatus
+	WMode      WrapMode
+	Format     ImageFormat
+	IsAtlas    bool
 }
 
 type GeometryCompressionFlags C.uint
 type GeometryCompression CompressedGeometryFormat
 
 type GPUTextureCompression C.uint
+
 const (
 	TC_NOT_SET            = ImageFormat(0)
 	TC_JPG                = ImageFormat(1)
@@ -490,7 +495,7 @@ const (
 	TC_DESKTOP            = TC_DEFAULT | TC_DDS
 	TC_ALL_COMPRESSED     = TC_DESKTOP | TC_KTX
 	TC_NOT_GPU_COMPRESSED = TC_UNCOMPRESSED | TC_JPG | TC_PNG
-	TC_DXT_BC_ALL = TC_DDS
-	TC_ETC_2 = TC_KTX
-	TC_DESKTOP = TC_DXT_BC_ALL
+	TC_DXT_BC_ALL         = TC_DDS
+	TC_ETC_2              = TC_KTX
+	TC_DESKTOP            = TC_DXT_BC_ALL
 )
