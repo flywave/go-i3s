@@ -457,8 +457,8 @@ static jpeg_status compress_jpeg_internal(int w, int h, const char* src, int byt
   cinfo.in_color_space = JCS_RGB;
 
   jpeg_set_defaults(&cinfo);
-  jpeg_set_quality(&cinfo, quality, true); // limit to baseline JPEG values
-  jpeg_start_compress(&cinfo, true);
+  jpeg_set_quality(&cinfo, quality, TRUE); // limit to baseline JPEG values
+  jpeg_start_compress(&cinfo, TRUE);
 
   JSAMPROW row_pointer;
   const uint8_t *buffer = (const uint8_t*)src;

@@ -10,7 +10,7 @@ endif()
 
 set(draco_root "${CMAKE_CURRENT_SOURCE_DIR}")
 set(draco_src_root "${draco_root}/src/draco")
-set(draco_build "${CMAKE_BINARY_DIR}")
+set(draco_build "${CMAKE_CURRENT_BINARY_DIR}")
 
 if("${draco_root}" STREQUAL "${draco_build}")
   message(
@@ -22,7 +22,6 @@ if("${draco_root}" STREQUAL "${draco_build}")
 endif()
 
 include(CMakePackageConfigHelpers)
-include(FindPythonInterp)
 include("${draco_root}/cmake/draco_build_definitions.cmake")
 include("${draco_root}/cmake/draco_cpu_detection.cmake")
 include("${draco_root}/cmake/draco_emscripten.cmake")
@@ -48,12 +47,6 @@ draco_track_configuration_variable(DRACO_GENERATED_SOURCES_DIRECTORY)
 
 # Controls use of std::mutex and absl::Mutex in ThreadPool.
 draco_track_configuration_variable(DRACO_THREADPOOL_USE_STD_MUTEX)
-
-if(DRACO_VERBOSE)
-  draco_dump_cmake_flag_variables()
-  draco_dump_tracked_configuration_variables()
-  draco_dump_options()
-endif()
 
 # Compiler/linker flags must be lists, but come in from the environment as
 # strings. Break them up:
@@ -494,178 +487,6 @@ list(APPEND draco_maya_plug_sources
             "${draco_src_root}/maya/draco_maya_plugin.cc"
             "${draco_src_root}/maya/draco_maya_plugin.h")
 
-#
-# Draco targets.
-#
-if(EMSCRIPTEN AND DRACO_JS_GLUE)
-  # Draco decoder and encoder "executable" targets in various flavors for
-  # Emsscripten.
-  list(APPEND draco_decoder_src
-              ${draco_attributes_sources}
-              ${draco_compression_attributes_dec_sources}
-              ${draco_compression_attributes_pred_schemes_dec_sources}
-              ${draco_compression_bit_coders_sources}
-              ${draco_compression_decode_sources}
-              ${draco_compression_entropy_sources}
-              ${draco_compression_mesh_traverser_sources}
-              ${draco_compression_mesh_dec_sources}
-              ${draco_compression_point_cloud_dec_sources}
-              ${draco_core_sources}
-              ${draco_dec_config_sources}
-              ${draco_js_dec_sources}
-              ${draco_mesh_sources}
-              ${draco_metadata_dec_sources}
-              ${draco_metadata_sources}
-              ${draco_point_cloud_sources}
-              ${draco_points_dec_sources})
-
-  list(APPEND draco_encoder_src
-              ${draco_attributes_sources}
-              ${draco_compression_attributes_enc_sources}
-              ${draco_compression_attributes_pred_schemes_enc_sources}
-              ${draco_compression_bit_coders_sources}
-              ${draco_compression_encode_sources}
-              ${draco_compression_entropy_sources}
-              ${draco_compression_mesh_traverser_sources}
-              ${draco_compression_mesh_enc_sources}
-              ${draco_compression_point_cloud_enc_sources}
-              ${draco_core_sources}
-              ${draco_enc_config_sources}
-              ${draco_js_enc_sources}
-              ${draco_mesh_sources}
-              ${draco_metadata_enc_sources}
-              ${draco_metadata_sources}
-              ${draco_point_cloud_sources}
-              ${draco_points_enc_sources})
-
-  list(APPEND draco_js_dec_idl
-              "${draco_src_root}/javascript/emscripten/draco_web_decoder.idl")
-  list(APPEND draco_js_enc_idl
-              "${draco_src_root}/javascript/emscripten/draco_web_encoder.idl")
-  list(
-    APPEND
-      draco_animation_js_dec_idl
-      "${draco_src_root}/javascript/emscripten/draco_animation_web_decoder.idl")
-  list(
-    APPEND
-      draco_animation_js_enc_idl
-      "${draco_src_root}/javascript/emscripten/draco_animation_web_encoder.idl")
-  list(APPEND draco_pre_link_js_sources
-              "${draco_src_root}/javascript/emscripten/prepareCallbacks.js"
-              "${draco_src_root}/javascript/emscripten/version.js")
-  list(APPEND draco_post_link_js_sources
-              "${draco_src_root}/javascript/emscripten/finalize.js")
-  list(APPEND draco_post_link_js_decoder_sources ${draco_post_link_js_sources}
-              "${draco_src_root}/javascript/emscripten/decoder_functions.js")
-
-  set(draco_decoder_glue_path "${draco_build}/glue_decoder")
-  set(draco_encoder_glue_path "${draco_build}/glue_encoder")
-
-  draco_generate_emscripten_glue(INPUT_IDL ${draco_js_dec_idl} OUTPUT_PATH
-                                 ${draco_decoder_glue_path})
-  draco_generate_emscripten_glue(INPUT_IDL ${draco_js_enc_idl} OUTPUT_PATH
-                                 ${draco_encoder_glue_path})
-
-  if(DRACO_DECODER_ATTRIBUTE_DEDUPLICATION)
-    list(APPEND draco_decoder_features
-                "DRACO_ATTRIBUTE_INDICES_DEDUPLICATION_SUPPORTED"
-                "DRACO_ATTRIBUTE_VALUES_DEDUPLICATION_SUPPORTED")
-  endif()
-
-  draco_add_emscripten_executable(NAME
-                                  draco_decoder
-                                  SOURCES
-                                  ${draco_decoder_src}
-                                  DEFINES
-                                  ${draco_defines}
-                                  FEATURES
-                                  ${draco_decoder_features}
-                                  INCLUDES
-                                  ${draco_include_paths}
-                                  LINK_FLAGS
-                                  "-sEXPORT_NAME=\"DracoDecoderModule\""
-                                  GLUE_PATH
-                                  ${draco_decoder_glue_path}
-                                  PRE_LINK_JS_SOURCES
-                                  ${draco_pre_link_js_sources}
-                                  POST_LINK_JS_SOURCES
-                                  ${draco_post_link_js_decoder_sources})
-
-  draco_add_emscripten_executable(
-    NAME
-    draco_encoder
-    SOURCES
-    ${draco_encoder_src}
-    DEFINES
-    ${draco_defines}
-    FEATURES
-    DRACO_ATTRIBUTE_INDICES_DEDUPLICATION_SUPPORTED
-    DRACO_ATTRIBUTE_VALUES_DEDUPLICATION_SUPPORTED
-    INCLUDES
-    ${draco_include_paths}
-    LINK_FLAGS
-    "-sEXPORT_NAME=\"DracoEncoderModule\""
-    GLUE_PATH
-    ${draco_encoder_glue_path}
-    PRE_LINK_JS_SOURCES
-    ${draco_pre_link_js_sources}
-    POST_LINK_JS_SOURCES
-    ${draco_post_link_js_sources})
-
-  if(DRACO_ANIMATION_ENCODING)
-    set(draco_anim_decoder_glue_path "${draco_build}/glue_animation_decoder")
-    set(draco_anim_encoder_glue_path "${draco_build}/glue_animation_encoder")
-
-    draco_generate_emscripten_glue(INPUT_IDL ${draco_animation_js_dec_idl}
-                                   OUTPUT_PATH ${draco_anim_decoder_glue_path})
-    draco_generate_emscripten_glue(INPUT_IDL ${draco_animation_js_enc_idl}
-                                   OUTPUT_PATH ${draco_anim_encoder_glue_path})
-
-    draco_add_emscripten_executable(
-      NAME
-      draco_animation_decoder
-      SOURCES
-      ${draco_animation_dec_sources}
-      ${draco_animation_js_dec_sources}
-      ${draco_animation_sources}
-      ${draco_decoder_src}
-      DEFINES
-      ${draco_defines}
-      INCLUDES
-      ${draco_include_paths}
-      LINK_FLAGS
-      "-sEXPORT_NAME=\"DracoAnimationDecoderModule\""
-      GLUE_PATH
-      ${draco_anim_decoder_glue_path}
-      PRE_LINK_JS_SOURCES
-      ${draco_pre_link_js_sources}
-      POST_LINK_JS_SOURCES
-      ${draco_post_link_js_decoder_sources})
-
-    draco_add_emscripten_executable(
-      NAME
-      draco_animation_encoder
-      SOURCES
-      ${draco_animation_enc_sources}
-      ${draco_animation_js_enc_sources}
-      ${draco_animation_sources}
-      ${draco_encoder_src}
-      DEFINES
-      ${draco_defines}
-      INCLUDES
-      ${draco_include_paths}
-      LINK_FLAGS
-      "-sEXPORT_NAME=\"DracoAnimationEncoderModule\""
-      GLUE_PATH
-      ${draco_anim_encoder_glue_path}
-      PRE_LINK_JS_SOURCES
-      ${draco_pre_link_js_sources}
-      POST_LINK_JS_SOURCES
-      ${draco_post_link_js_sources})
-  endif()
-else()
-  # Standard Draco libs, encoder and decoder. Object collections that mirror the
-  # Draco directory structure.
   draco_add_library(NAME draco_attributes TYPE OBJECT SOURCES
                     ${draco_attributes_sources} DEFINES ${draco_defines}
                     INCLUDES ${draco_include_paths})
@@ -803,35 +624,7 @@ else()
       draco_points_dec
       draco_points_enc)
 
-  # Library targets that consume the object collections.
-  if(MSVC)
-    # In order to produce a DLL and import library the Windows tools require
-    # that the exported symbols are part of the DLL target. The unfortunate side
-    # effect of this is that a single configuration cannot output both the
-    # static library and the DLL: This results in an either/or situation.
-    # Windows users of the draco build can have a DLL and an import library,
-    # or they can have a static library; they cannot have both from a single
-    # configuration of the build.
-    if(BUILD_SHARED_LIBS)
-      set(draco_lib_type SHARED)
-    else()
-      set(draco_lib_type STATIC)
-    endif()
-    draco_add_library(NAME
-                      draco
-                      OUTPUT_NAME
-                      draco
-                      TYPE
-                      ${draco_lib_type}
-                      DEFINES
-                      ${draco_defines}
-                      INCLUDES
-                      ${draco_include_paths}
-                      OBJLIB_DEPS
-                      ${draco_object_library_deps})
-
-  else()
-    draco_add_library(NAME
+  draco_add_library(NAME
                       draco_static
                       OUTPUT_NAME
                       draco
@@ -844,109 +637,35 @@ else()
                       OBJLIB_DEPS
                       ${draco_object_library_deps})
 
-    if(BUILD_SHARED_LIBS)
-      draco_add_library(NAME
-                        draco_shared
-                        SOURCES
-                        "${draco_src_root}/core/draco_version.h"
-                        OUTPUT_NAME
-                        draco
-                        TYPE
-                        SHARED
-                        DEFINES
-                        ${draco_defines}
-                        INCLUDES
-                        ${draco_include_paths}
-                        LIB_DEPS
-                        draco_static)
-    endif()
-  endif()
-
-  if(DRACO_UNITY_PLUGIN)
-    if(IOS)
-      set(unity_decoder_lib_type STATIC)
-    else()
-      set(unity_decoder_lib_type MODULE)
-    endif()
-
-    draco_add_library(NAME draco_unity_plugin TYPE OBJECT SOURCES
-                      ${draco_unity_plug_sources} DEFINES ${draco_defines}
-                      INCLUDES ${draco_include_paths})
-
-    draco_add_library(NAME
-                      dracodec_unity
-                      TYPE
-                      ${unity_decoder_lib_type}
-                      DEFINES
-                      ${draco_defines}
-                      INCLUDES
-                      ${draco_include_paths}
-                      OBJLIB_DEPS
-                      draco_unity_plugin
-                      LIB_DEPS
-                      ${draco_plugin_dependency})
-
-    # For Mac, we need to build a .bundle for the unity plugin.
-    if(APPLE)
-      set_target_properties(dracodec_unity PROPERTIES BUNDLE true)
-    endif()
-  endif()
-
-  if(DRACO_MAYA_PLUGIN)
-    draco_add_library(NAME draco_maya_plugin TYPE OBJECT SOURCES
-                      ${draco_maya_plug_sources} DEFINES ${draco_defines}
-                      INCLUDES ${draco_include_paths})
-
-    draco_add_library(NAME
-                      draco_maya_wrapper
-                      TYPE
-                      MODULE
-                      DEFINES
-                      ${draco_defines}
-                      INCLUDES
-                      ${draco_include_paths}
-                      OBJLIB_DEPS
-                      draco_maya_plugin
-                      LIB_DEPS
-                      ${draco_plugin_dependency})
-
-    # For Mac, we need to build a .bundle for the plugin.
-    if(APPLE)
-      set_target_properties(draco_maya_wrapper PROPERTIES BUNDLE true)
-    endif()
-  endif()
-
-  # Draco app targets.
-  draco_add_executable(NAME
-                       draco_decoder
-                       SOURCES
-                       "${draco_src_root}/tools/draco_decoder.cc"
-                       ${draco_io_sources}
-                       DEFINES
-                       ${draco_defines}
-                       INCLUDES
-                       ${draco_include_paths}
-                       LIB_DEPS
-                       ${draco_dependency})
-
-  draco_add_executable(NAME
-                       draco_encoder
-                       SOURCES
-                       "${draco_src_root}/tools/draco_encoder.cc"
-                       ${draco_io_sources}
-                       DEFINES
-                       ${draco_defines}
-                       INCLUDES
-                       ${draco_include_paths}
-                       LIB_DEPS
-                       ${draco_dependency})
-
-  draco_setup_install_target()
-  draco_setup_test_targets()
-endif()
-
-if(DRACO_VERBOSE)
-  draco_dump_cmake_flag_variables()
-  draco_dump_tracked_configuration_variables()
-  draco_dump_options()
-endif()
+IF(FLYWAVE_ENABLE_SOLUTION_FOLDERS)
+SET_TARGET_PROPERTIES(draco_attributes PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_attributes_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_attributes_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_bit_coders PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_decode PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_encode PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_entropy PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_mesh_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_mesh_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_point_cloud_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_point_cloud_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_core PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_dec_config PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_enc_config PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_io PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_mesh PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_metadata PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_metadata_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_metadata_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_animation PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_animation_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_animation_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_point_cloud PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_points_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_points_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_static PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_attributes_pred_schemes_enc PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_attributes_pred_schemes_dec PROPERTIES FOLDER external/draco)
+SET_TARGET_PROPERTIES(draco_compression_mesh_traverser PROPERTIES FOLDER external/draco)
+ENDIF(FLYWAVE_ENABLE_SOLUTION_FOLDERS)
+                    

@@ -15,25 +15,6 @@ macro(draco_setup_install_target)
   set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
   set(draco_lib_name "draco")
 
-  configure_file("${draco_root}/cmake/draco.pc.template"
-                 "${draco_build}/draco.pc" @ONLY NEWLINE_STYLE UNIX)
-  install(FILES "${draco_build}/draco.pc"
-          DESTINATION "${prefix}/${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-
-  # CMake config: draco-config.cmake
-  set(DRACO_INCLUDE_DIRS "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
-  configure_file("${draco_root}/cmake/draco-config.cmake.template"
-                 "${draco_build}/draco-config.cmake" @ONLY NEWLINE_STYLE UNIX)
-  install(
-    FILES "${draco_build}/draco-config.cmake"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/cmake")
-
-  foreach(file ${draco_sources})
-    if(file MATCHES "h$")
-      list(APPEND draco_api_includes ${file})
-    endif()
-  endforeach()
-
   # Strip $draco_src_root from the file paths: we need to install relative to
   # $include_directory.
   list(TRANSFORM draco_api_includes REPLACE "${draco_src_root}/" "")

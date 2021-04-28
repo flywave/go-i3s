@@ -137,6 +137,8 @@
 #define PNG_tIME_SUPPORTED
 #define PNG_pHYs_SUPPORTED
 #define PNG_oFFs_SUPPORTED
+#define PNG_WRITE_INVERT_SUPPORTED
+#define PNG_READ_INVERT_SUPPORTED
 /* end of options */
 
 /* chromium options */

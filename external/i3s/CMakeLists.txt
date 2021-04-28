@@ -31,11 +31,6 @@ option(NO_ETC2_SUPPORT "Disable ETC2 support.")
 
 project(i3s)
 
-# Uncomment to see compilation commands with Linux builds
-#set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Verbose build output" FORCE)
-
-set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/3rdparty) 
-
 set(I3SLIB_SOURCES
   src/i3s/i3s_context_impl.cpp
   src/i3s/i3s_enums_generated.cpp
@@ -68,7 +63,7 @@ set(I3SLIB_SOURCES
   src/utils/utl_variant.cpp
   src/utils/utl_zip_archive_impl.cpp)
 
-add_library(i3s SHARED ${I3SLIB_SOURCES})
+add_library(i3s STATIC ${I3SLIB_SOURCES})
 
 # If we don't do this, CMake would define i3s_EXPORTS symbol by default. 
 set_target_properties(i3s PROPERTIES DEFINE_SYMBOL "I3S_LIB")
@@ -100,77 +95,22 @@ target_include_directories(i3s PUBLIC include)
 
 target_include_directories(i3s PRIVATE
   src
-  ${THIRD_PARTY_DIR}/zlib/include
-  ${THIRD_PARTY_DIR}/libpng/include
-  ${THIRD_PARTY_DIR}/libjpeg/include
-  ${THIRD_PARTY_DIR}/draco/include
-  ${THIRD_PARTY_DIR}/lepcc/include)
+  ${CMAKE_CURRENT_SOURCE_DIR}/../
+  ${CMAKE_CURRENT_SOURCE_DIR}/../zlib
+  ${CMAKE_CURRENT_SOURCE_DIR}/../libpng
+  ${CMAKE_CURRENT_SOURCE_DIR}/../libjpeg
+  ${CMAKE_CURRENT_BINARY_DIR}/../libjpeg
+  ${CMAKE_CURRENT_SOURCE_DIR}/../draco/src
+  ${CMAKE_CURRENT_BINARY_DIR}/../draco/
+  ${CMAKE_CURRENT_SOURCE_DIR}/../lepcc/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../lerc/include)
 
-if(NOT WIN32)
-  target_link_libraries(i3s stdc++fs)
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-endif()
-
-if(WIN32)
-  add_library(zlib UNKNOWN IMPORTED)
-  set_target_properties(zlib PROPERTIES IMPORTED_LOCATION_DEBUG ${THIRD_PARTY_DIR}/zlib/lib/x64/${CMAKE_BUILD_TYPE}/zlibd.lib)
-  set_target_properties(zlib PROPERTIES IMPORTED_LOCATION_RELEASE ${THIRD_PARTY_DIR}/zlib/lib/x64/${CMAKE_BUILD_TYPE}/zlib.lib)
-  
-  add_library(libpng UNKNOWN IMPORTED)
-  set_target_properties(libpng PROPERTIES IMPORTED_LOCATION_DEBUG ${THIRD_PARTY_DIR}/libpng/lib/x64/${CMAKE_BUILD_TYPE}/libpng16d.lib)
-  set_target_properties(libpng PROPERTIES IMPORTED_LOCATION_RELEASE ${THIRD_PARTY_DIR}/libpng/lib/x64/${CMAKE_BUILD_TYPE}/libpng16.lib)
-  
-  add_library(libjpeg UNKNOWN IMPORTED)
-  set_target_properties(libjpeg PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/libjpeg/lib/x64/${CMAKE_BUILD_TYPE}/jpeg.lib)
-  
-  add_library(draco UNKNOWN IMPORTED)
-  set_target_properties(draco PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/draco/lib/x64/${CMAKE_BUILD_TYPE}/draco.lib)
-
-  add_library(lepcc UNKNOWN IMPORTED)
-  set_target_properties(lepcc PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/lepcc/lib/x64/${CMAKE_BUILD_TYPE}/lepcc.lib)
-  
-  if(NOT NO_ETC2_SUPPORT)
-    add_library(EtcLib UNKNOWN IMPORTED)
-    set_target_properties(EtcLib PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/etc2comp/lib/x64/${CMAKE_BUILD_TYPE}/EtcLib.lib)
-  endif()
-else()
-  add_library(zlib SHARED IMPORTED)
-  set_target_properties(zlib PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/zlib/lib/x64/${CMAKE_BUILD_TYPE}/libz.so)
-  
-  add_library(libpng SHARED IMPORTED)
-  set_target_properties(libpng PROPERTIES IMPORTED_LOCATION_DEBUG ${THIRD_PARTY_DIR}/libpng/lib/x64/${CMAKE_BUILD_TYPE}/libpng16d.so)
-  set_target_properties(libpng PROPERTIES IMPORTED_LOCATION_RELEASE ${THIRD_PARTY_DIR}/libpng/lib/x64/${CMAKE_BUILD_TYPE}/libpng16.so)
-  
-  add_library(libjpeg SHARED IMPORTED)
-  set_target_properties(libjpeg PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/libjpeg/lib/x64/${CMAKE_BUILD_TYPE}/libjpeg.so)
-  
-  add_library(draco SHARED IMPORTED)
-  set_target_properties(draco PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/draco/lib/x64/${CMAKE_BUILD_TYPE}/libdraco.so)
-
-  add_library(lepcc STATIC IMPORTED)
-  set_target_properties(lepcc PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/lepcc/lib/x64/${CMAKE_BUILD_TYPE}/liblepcc.a)
-  
-  if(NOT NO_ETC2_SUPPORT)
-	  add_library(EtcLib SHARED IMPORTED)
-	  set_target_properties(EtcLib PROPERTIES IMPORTED_LOCATION ${THIRD_PARTY_DIR}/etc2comp/lib/x64/${CMAKE_BUILD_TYPE}/libEtcLib.so)
-  endif()
-endif()
+target_link_libraries(i3s stdc++fs)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 
 target_link_libraries(i3s zlib libpng libjpeg draco lepcc)
-if(NO_ETC2_SUPPORT)
-  target_compile_definitions(i3s PRIVATE -DNO_ETC2_SUPPORT)
-else()
-  target_link_libraries(i3s EtcLib)
-endif()
+target_link_libraries(i3s EtcLib)
 
-# raster2slpk example app target
-set(RASTER2SLPK_SOURCES "examples/raster2slpk/main.cpp")
-add_executable(raster2slpk ${RASTER2SLPK_SOURCES})
-
-if(WIN32)
-  target_compile_definitions(raster2slpk PRIVATE -D_UNICODE -DUNICODE)
-endif()
-
-target_include_directories(raster2slpk PRIVATE include) 
-
-target_link_libraries(raster2slpk i3s)
+IF(FLYWAVE_ENABLE_SOLUTION_FOLDERS)
+  SET_TARGET_PROPERTIES(i3s PROPERTIES FOLDER external)
+ENDIF(FLYWAVE_ENABLE_SOLUTION_FOLDERS)
