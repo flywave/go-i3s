@@ -17,7 +17,7 @@ Redlands, California, USA 92373
 email: contracts@esri.com
 */
 
-#include "etc2comp_c_api.h"
+#include "utl_etc2comp_c_api.h"
 #include "Etc.h"
 #include "EtcImage.h"
 #include <sstream>

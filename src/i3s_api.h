@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -26,6 +27,10 @@ typedef struct _i3s_layer_meta_t i3s_layer_meta_t;
 typedef struct _i3s_attribute_meta_t i3s_attribute_meta_t;
 typedef struct _i3s_mesh_data_t i3s_mesh_data_t;
 typedef struct _i3s_texture_meta_t i3s_texture_meta_t;
+typedef struct _i3s_spatial_reference_t i3s_spatial_reference_t;
+typedef struct _i3s_slpk_writer_t i3s_slpk_writer_t;
+
+FLYWAVE_I3S_API char *get_message_string(int string_id);
 
 FLYWAVE_I3S_API i3s_ctx_properties_t *ctx_properties_create();
 FLYWAVE_I3S_API void ctx_properties_free(i3s_ctx_properties_t *prop);
@@ -108,6 +113,8 @@ FLYWAVE_I3S_API void attribute_meta_set_alias(i3s_attribute_meta_t *nd,
 
 FLYWAVE_I3S_API i3s_layer_writer_t *
 layer_writer_create(i3s_writer_context_t *ctx, const char *path);
+FLYWAVE_I3S_API i3s_layer_writer_t *
+layer_writer_create_with_slpk_writer(i3s_writer_context_t *ctx, i3s_slpk_writer_t *writer);
 FLYWAVE_I3S_API void layer_writer_free(i3s_layer_writer_t *nd);
 FLYWAVE_I3S_API void layer_writer_set_layer_meta(i3s_layer_writer_t *nd,
                                                  i3s_layer_meta_t *lm);
@@ -117,13 +124,13 @@ FLYWAVE_I3S_API void layer_writer_set_attribute_meta(i3s_layer_writer_t *nd,
                                                      int schema_id);
 FLYWAVE_I3S_API void layer_writer_create_output_node(i3s_layer_writer_t *lw,
                                                      i3s_node_data_t *nd,
-                                                     uint64_t node_id);
+                                                     size_t node_id);
 FLYWAVE_I3S_API void layer_writer_create_node(i3s_layer_writer_t *lw,
                                               i3s_node_data_t *nd,
-                                              uint64_t node_id);
+                                              size_t node_id);
 FLYWAVE_I3S_API void layer_writer_process_children(i3s_layer_writer_t *lw,
                                                    i3s_node_data_t *nd,
-                                                   uint64_t node_id);
+                                                   size_t node_id);
 FLYWAVE_I3S_API void layer_writer_create_mesh_from_raw(i3s_layer_writer_t *lw,
                                                        i3s_raw_mesh_t *mesh,
                                                        i3s_node_data_t *nd);
@@ -138,7 +145,7 @@ FLYWAVE_I3S_API void node_data_set_lod_threshold(i3s_node_data_t *nd,
 FLYWAVE_I3S_API void node_data_set_node_depth(i3s_node_data_t *nd,
                                               int node_depth);
 FLYWAVE_I3S_API void node_data_append_children(i3s_node_data_t *nd,
-                                               uint64_t node_id);
+                                               size_t node_id);
 FLYWAVE_I3S_API i3s_mesh_data_t *node_data_get_mesh_data(i3s_node_data_t *nd);
 
 FLYWAVE_I3S_API void mesh_data_free(i3s_mesh_data_t *md);
@@ -208,10 +215,11 @@ FLYWAVE_I3S_API void texture_meta_set_is_atlas(i3s_texture_meta_t *nd,
 
 FLYWAVE_I3S_API i3s_raw_mesh_t *raw_mesh_create();
 FLYWAVE_I3S_API void raw_mesh_free(i3s_raw_mesh_t *nd);
-FLYWAVE_I3S_API void
-raw_mesh_set_vertex(i3s_raw_mesh_t *nd, const double *vertexs, const float *uvs,
-                    uint64_t vertex_count, const uint32_t *indices,
-                    uint64_t index_count);
+FLYWAVE_I3S_API void raw_mesh_set_vertex(i3s_raw_mesh_t *nd,
+                                         const double *vertexs,
+                                         const float *uvs, size_t vertex_count,
+                                         const uint32_t *indices,
+                                         size_t index_count);
 FLYWAVE_I3S_API _Bool raw_mesh_set_texture(i3s_raw_mesh_t *nd, int width,
                                            int height, int channel_count,
                                            const char *data);
@@ -222,6 +230,26 @@ FLYWAVE_I3S_API void raw_points_set_points(i3s_raw_points_t *nd,
                                            const double *vertexs,
                                            const uint32_t *fids,
                                            uint64_t vertex_count);
+
+FLYWAVE_I3S_API void spatial_reference_free(i3s_spatial_reference_t *nd);
+FLYWAVE_I3S_API int spatial_reference_get_wkid(i3s_spatial_reference_t *sr);
+FLYWAVE_I3S_API int
+spatial_reference_get_latest_wkid(i3s_spatial_reference_t *sr);
+FLYWAVE_I3S_API int spatial_reference_get_vcs_id(i3s_spatial_reference_t *sr);
+FLYWAVE_I3S_API int
+spatial_reference_get_latest_vcs_id(i3s_spatial_reference_t *sr);
+FLYWAVE_I3S_API const char *
+spatial_reference_get_wkt(i3s_spatial_reference_t *sr);
+
+FLYWAVE_I3S_API i3s_cartesian_transformation_t *
+cartesian_transformation_create(void *ctx);
+FLYWAVE_I3S_API void
+cartesian_transformation_free(i3s_cartesian_transformation_t *nd);
+
+FLYWAVE_I3S_API i3s_slpk_writer_t *
+slpk_writer_create(void *ctx);
+FLYWAVE_I3S_API void
+slpk_writer_free(i3s_slpk_writer_t *nd);
 
 #ifdef __cplusplus
 }

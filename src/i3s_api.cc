@@ -7,6 +7,7 @@
 
 #include <i3s/i3s_common_.h>
 #include <i3s/i3s_writer.h>
+#include <utils/utl_i3s_resource_defines.h>
 #include <utils/utl_lock.h>
 #include <utils/utl_slpk_writer_api.h>
 
@@ -64,6 +65,14 @@ struct _i3s_attribute_meta_t {
 
 struct _i3s_texture_meta_t {
   i3slib::i3s::Texture_meta *meta;
+};
+
+struct _i3s_spatial_reference_t {
+  const i3slib::i3s::Spatial_reference *sr;
+};
+
+struct _i3s_slpk_writer_t {
+  i3slib::utl::Slpk_writer::Ptr ptr;
 };
 
 FLYWAVE_I3S_API i3s_ctx_properties_t *ctx_properties_create() {
@@ -266,6 +275,13 @@ layer_writer_create(i3s_writer_context_t *ctx, const char *path) {
           ctx->ctx, std::filesystem::path(path)))};
 }
 
+FLYWAVE_I3S_API i3s_layer_writer_t *
+layer_writer_create_with_slpk_writer(i3s_writer_context_t *ctx,
+                                     i3s_slpk_writer_t *writer) {
+  return new i3s_layer_writer_t{i3slib::i3s::Layer_writer::Ptr(
+      i3slib::i3s::create_mesh_layer_builder(ctx->ctx, writer->ptr))};
+}
+
 FLYWAVE_I3S_API void layer_writer_free(i3s_layer_writer_t *lw) {
   if (lw) {
     delete lw;
@@ -286,19 +302,19 @@ FLYWAVE_I3S_API void layer_writer_set_attribute_meta(i3s_layer_writer_t *lw,
 
 FLYWAVE_I3S_API void layer_writer_create_output_node(i3s_layer_writer_t *lw,
                                                      i3s_node_data_t *nd,
-                                                     uint64_t node_id) {
+                                                     size_t node_id) {
   lw->ptr->create_output_node(nd->data, node_id);
 }
 
 FLYWAVE_I3S_API void layer_writer_create_node(i3s_layer_writer_t *lw,
                                               i3s_node_data_t *nd,
-                                              uint64_t node_id) {
+                                              size_t node_id) {
   lw->ptr->create_node(nd->data, node_id);
 }
 
 FLYWAVE_I3S_API void layer_writer_process_children(i3s_layer_writer_t *lw,
                                                    i3s_node_data_t *nd,
-                                                   uint64_t node_id) {
+                                                   size_t node_id) {
   lw->ptr->process_children(nd->data, node_id);
 }
 
@@ -316,20 +332,6 @@ FLYWAVE_I3S_API void layer_writer_create_points_from_raw(
 FLYWAVE_I3S_API void layer_writer_save(i3s_layer_writer_t *lw) {
   lw->ptr->save();
 }
-
-struct go_cartesian_transformation
-    : public i3slib::i3s::Cartesian_transformation {
-public:
-  virtual bool to_cartesian(const i3slib::i3s::Spatial_reference &sr,
-                            i3slib::utl::Vec3d *xyz, int count) override {
-    return true;
-  }
-
-  virtual bool from_cartesian(const i3slib::i3s::Spatial_reference &sr,
-                              i3slib::utl::Vec3d *xyz, int count) override {
-    return true;
-  }
-};
 
 FLYWAVE_I3S_API i3s_node_data_t *node_data_create() {
   return new i3s_node_data_t{};
@@ -515,7 +517,7 @@ FLYWAVE_I3S_API void node_data_set_node_depth(i3s_node_data_t *nd,
 }
 
 FLYWAVE_I3S_API void node_data_append_children(i3s_node_data_t *nd,
-                                               uint64_t node_id) {
+                                               size_t node_id) {
   nd->data.children.emplace_back(node_id);
 }
 
@@ -529,10 +531,11 @@ FLYWAVE_I3S_API void raw_mesh_free(i3s_raw_mesh_t *nd) {
   }
 }
 
-FLYWAVE_I3S_API void
-raw_mesh_set_vertex(i3s_raw_mesh_t *nd, const double *vertexs, const float *uvs,
-                    uint64_t vertex_count, const uint32_t *indices,
-                    uint64_t index_count) {
+FLYWAVE_I3S_API void raw_mesh_set_vertex(i3s_raw_mesh_t *nd,
+                                         const double *vertexs,
+                                         const float *uvs, size_t vertex_count,
+                                         const uint32_t *indices,
+                                         size_t index_count) {
   nd->mesh.vertex_count = vertex_count;
   nd->mesh.abs_xyz = reinterpret_cast<const i3slib::utl::Vec3d *>(vertexs);
   nd->mesh.uv = reinterpret_cast<const i3slib::utl::Vec2f *>(uvs);
@@ -566,6 +569,129 @@ FLYWAVE_I3S_API void raw_points_set_points(i3s_raw_points_t *nd,
   nd->pts.count = vertex_count;
   nd->pts.abs_xyz = reinterpret_cast<const i3slib::utl::Vec3d *>(vertexs);
   nd->pts.fids = fids;
+}
+
+FLYWAVE_I3S_API char *get_message_string(int string_id) {
+  std::string msg = i3slib::utl::get_message_string(string_id);
+  char *ret = (char *)malloc(msg.size());
+  memcpy(ret, msg.c_str(), msg.size());
+  return ret;
+}
+
+FLYWAVE_I3S_API void spatial_reference_free(i3s_spatial_reference_t *nd) {
+  if (nd) {
+    delete nd;
+  }
+}
+
+FLYWAVE_I3S_API int spatial_reference_get_wkid(i3s_spatial_reference_t *sr) {
+  return sr->sr->wkid;
+}
+
+FLYWAVE_I3S_API int
+spatial_reference_get_latest_wkid(i3s_spatial_reference_t *sr) {
+  return sr->sr->latest_wkid;
+}
+
+FLYWAVE_I3S_API int spatial_reference_get_vcs_id(i3s_spatial_reference_t *sr) {
+  return sr->sr->vcs_id;
+}
+
+FLYWAVE_I3S_API int
+spatial_reference_get_latest_vcs_id(i3s_spatial_reference_t *sr) {
+  return sr->sr->latest_vcs_id;
+}
+
+FLYWAVE_I3S_API const char *
+spatial_reference_get_wkt(i3s_spatial_reference_t *sr) {
+  return sr->sr->wkt.c_str();
+}
+
+extern _Bool toCartesian(void *, i3s_spatial_reference_t *, float *, int);
+extern _Bool fromCartesian(void *, i3s_spatial_reference_t *, float *, int);
+
+struct go_cartesian_transformation
+    : public i3slib::i3s::Cartesian_transformation {
+public:
+  void *ctx;
+  go_cartesian_transformation(void *_ctx) : ctx(_ctx) {}
+
+  virtual bool to_cartesian(const i3slib::i3s::Spatial_reference &sr,
+                            i3slib::utl::Vec3d *xyz, int count) override {
+    i3s_spatial_reference_t csr{&sr};
+    return toCartesian(ctx, &csr, reinterpret_cast<float *>(xyz), count);
+  }
+
+  virtual bool from_cartesian(const i3slib::i3s::Spatial_reference &sr,
+                              i3slib::utl::Vec3d *xyz, int count) override {
+    i3s_spatial_reference_t csr{&sr};
+    return fromCartesian(ctx, &csr, reinterpret_cast<float *>(xyz), count);
+  }
+};
+
+FLYWAVE_I3S_API i3s_cartesian_transformation_t *
+cartesian_transformation_create(void *ctx) {
+  return new i3s_cartesian_transformation_t{
+      i3slib::i3s::Cartesian_transformation::Ptr{
+          new go_cartesian_transformation(ctx)}};
+}
+
+FLYWAVE_I3S_API void
+cartesian_transformation_free(i3s_cartesian_transformation_t *nd) {
+  if (nd) {
+    delete nd;
+  }
+}
+
+extern _Bool createArchive(void *, char *, uint32_t);
+extern _Bool appendFile(void *, char *, uint8_t *, int, uint32_t, uint32_t);
+extern uint8_t *getFile(void *, char *, size_t *);
+extern _Bool finalize(void *);
+
+class go_slpk_writer : public i3slib::utl::Slpk_writer {
+public:
+  DECL_PTR(go_slpk_writer);
+  go_slpk_writer(void *_ctx) : ctx(_ctx) {}
+  ~go_slpk_writer() override = default;
+
+  void *ctx;
+
+  virtual bool create_archive(const std::filesystem::path &path,
+                              Create_flags flags) override {
+    return createArchive(ctx, const_cast<char *>(path.c_str()), flags);
+  }
+
+  virtual bool append_file(const std::string &path_in_archive,
+                           const char *buffer, int n_bytes,
+                           i3slib::utl::Mime_type type,
+                           i3slib::utl::Mime_encoding pack) override {
+    return appendFile(ctx, const_cast<char *>(path_in_archive.c_str()),
+                      (uint8_t *)(buffer), n_bytes, uint32_t(type),
+                      uint32_t(pack));
+  }
+
+  virtual bool get_file(const std::string &path_in_archive,
+                        std::string *content) override {
+    size_t size;
+    uint8_t *buf =
+        getFile(ctx, const_cast<char *>(path_in_archive.c_str()), &size);
+    content->resize(size);
+    memcpy(&(*content)[0], buf, size);
+    ::free(buf);
+    return true;
+  }
+
+  virtual bool finalize() override { return ::finalize(ctx); }
+};
+
+FLYWAVE_I3S_API i3s_slpk_writer_t *slpk_writer_create(void *ctx) {
+  return new i3s_slpk_writer_t{go_slpk_writer::Ptr(new go_slpk_writer(ctx))};
+}
+
+FLYWAVE_I3S_API void slpk_writer_free(i3s_slpk_writer_t *nd) {
+  if (nd) {
+    delete nd;
+  }
 }
 
 #ifdef __cplusplus

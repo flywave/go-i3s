@@ -61,7 +61,8 @@ set(I3SLIB_SOURCES
   src/utils/utl_slpk_writer_impl.cpp
   src/utils/utl_string.cpp
   src/utils/utl_variant.cpp
-  src/utils/utl_zip_archive_impl.cpp)
+  src/utils/utl_zip_archive_impl.cpp
+  src/utils/utl_etc2comp_c_api.cpp)
 
 add_library(i3s STATIC ${I3SLIB_SOURCES})
 
@@ -103,7 +104,9 @@ target_include_directories(i3s PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/../draco/src
   ${CMAKE_CURRENT_BINARY_DIR}/../draco/
   ${CMAKE_CURRENT_SOURCE_DIR}/../lepcc/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/../lerc/include)
+  ${CMAKE_CURRENT_SOURCE_DIR}/../lerc/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../etc2comp/EtcLib/Etc
+  ${CMAKE_CURRENT_SOURCE_DIR}/../etc2comp/EtcLib/EtcCodec)
 
 target_link_libraries(i3s stdc++fs)
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
