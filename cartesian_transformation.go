@@ -47,7 +47,8 @@ type CartesianTransformation struct {
 
 func NewCartesianTransformation(to func(sr *SpatialReference, xyz []C.float) bool, from func(sr *SpatialReference, xyz []C.float) bool) *CartesianTransformation {
 	ret := &CartesianTransformation{m: nil, to: to, from: from}
-	if p := C.cartesian_transformation_create((unsafe.Pointer)(ret)); p != nil {
+	inptr := uintptr(unsafe.Pointer(ret))
+	if p := C.cartesian_transformation_create((unsafe.Pointer)(&inptr)); p != nil {
 		ret.m = p
 		return ret
 	}
@@ -70,7 +71,7 @@ func toCartesian(ctx unsafe.Pointer, sr *C.struct__i3s_spatial_reference_t, xyz 
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(xyz))
 
-	return C.bool((*CartesianTransformation)(ctx).toCartesian(&SpatialReference{m: sr}, cpointsSlice))
+	return C.bool(*(**CartesianTransformation)(ctx).toCartesian(&SpatialReference{m: sr}, cpointsSlice))
 }
 
 //export fromCartesian
@@ -81,5 +82,5 @@ func fromCartesian(ctx unsafe.Pointer, sr *C.struct__i3s_spatial_reference_t, xy
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(xyz))
 
-	return C.bool((*CartesianTransformation)(ctx).fromCartesian(&SpatialReference{m: sr}, cpointsSlice))
+	return C.bool(*(**CartesianTransformation)(ctx).fromCartesian(&SpatialReference{m: sr}, cpointsSlice))
 }

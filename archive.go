@@ -10,6 +10,7 @@ package i3s
 // #cgo darwin LDFLAGS: -L　./lib -lci3s -lzlib -ldraco -li3s -ljpeg -llepcc -lpng -lEtcLib
 import "C"
 import (
+	"image"
 	"reflect"
 	"unsafe"
 )
@@ -131,8 +132,19 @@ func (n *RawMesh) SetVertex(vertexs []float64, uvs []float64, indices []uint32) 
 	C.raw_mesh_set_vertex(n.m, (*C.double)(unsafe.Pointer(&vertexs[0])), (*C.float)(unsafe.Pointer(&uvs[0])), C.size_t(len(vertexs)), (*C.uint)(unsafe.Pointer(&indices[0])), C.size_t(len(indices)))
 }
 
-func (n *RawMesh) SetTexture(size []int32, data []byte) {
+func (n *RawMesh) SetTexture(size []int32, data []uint8) {
 	C.raw_mesh_set_texture(n.m, C.int(size[0]), C.int(size[1]), C.int(size[2]), (*C.char)(unsafe.Pointer(&data[0])))
+}
+
+func (n *RawMesh) SetTextureImage(t interface{}) {
+	switch img := t.(type) {
+	case *image.NRGBA:
+		n.SetTexture([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
+	case *image.RGBA:
+		n.SetTexture([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
+	case *image.Gray:
+		n.SetTexture([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(1)}, img.Pix)
+	}
 }
 
 type RawPoints struct {
@@ -358,7 +370,7 @@ func (n *LayerWriter) Save() {
 	C.layer_writer_save(n.m)
 }
 
-func CreateDefateWriter(name string, slpkPath string, wkid int32) *LayerWriter {
+func CreateDefaultWriter(name string, slpkPath string, wkid int32) *LayerWriter {
 	ctx := NewCtxProperties()
 	writer_context := NewWriterContext(ctx)
 	meta := NewLayerMeta()
@@ -433,7 +445,7 @@ func (n *SlpkWriterAdapt) Free() {
 
 //export createArchive
 func createArchive(ctx unsafe.Pointer, path *C.char, flags C.uint) C.bool {
-	return C.bool(((*SlpkWriterAdapt)(ctx)).w.CreateArchive(C.GoString(path), CreateFlags(flags)))
+	return C.bool((*(**SlpkWriterAdapt)(ctx)).w.CreateArchive(C.GoString(path), CreateFlags(flags)))
 }
 
 //export appendFile
@@ -444,12 +456,12 @@ func appendFile(ctx unsafe.Pointer, path *C.char, buf *C.uchar, count C.int, mim
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(buf))
 
-	return C.bool(((*SlpkWriterAdapt)(ctx)).w.AppendFile(C.GoString(path), cpointsSlice, MimeType(mimeType), MimeEncoding(pack)))
+	return C.bool((*(**SlpkWriterAdapt)(ctx)).w.AppendFile(C.GoString(path), cpointsSlice, MimeType(mimeType), MimeEncoding(pack)))
 }
 
 //export getFile
 func getFile(ctx unsafe.Pointer, path *C.char, size *C.size_t) *C.uchar {
-	buf := ((*SlpkWriterAdapt)(ctx)).w.GetFile(C.GoString(path))
+	buf := (*(**SlpkWriterAdapt)(ctx)).w.GetFile(C.GoString(path))
 	*size = C.size_t(len(buf))
 	cbuf := C.malloc(*size)
 
@@ -459,12 +471,14 @@ func getFile(ctx unsafe.Pointer, path *C.char, size *C.size_t) *C.uchar {
 
 //export finalize
 func finalize(ctx unsafe.Pointer) C.bool {
-	return C.bool(((*SlpkWriterAdapt)(ctx)).w.Finalize())
+	return C.bool((*(**SlpkWriterAdapt)(ctx)).w.Finalize())
 }
 
 func NewSlpkWriterAdapt(ctx SlpkWriter) *SlpkWriterAdapt {
 	ret := &SlpkWriterAdapt{m: nil, w: ctx}
-	if p := C.slpk_writer_create((unsafe.Pointer)(ret)); p != nil {
+	inptr := uintptr(unsafe.Pointer(ret))
+
+	if p := C.slpk_writer_create((unsafe.Pointer)(&inptr)); p != nil {
 		ret.m = p
 		return ret
 	}

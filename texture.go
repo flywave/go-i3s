@@ -5,15 +5,30 @@ package i3s
 // #cgo CFLAGS: -I ./lib
 // #cgo CXXFLAGS: -I ./lib
 import "C"
-import "unsafe"
+import (
+	"image"
+	"unsafe"
+)
 
 type TextureBuffer struct {
 	m *C.struct__i3s_texture_buffer_t
 }
 
-func NewTextureBuffer(size []int32, data []byte) *TextureBuffer {
+func NewTextureBuffer(size []int32, data []uint8) *TextureBuffer {
 	if p := C.texture_buffer_create(C.int(size[0]), C.int(size[1]), C.int(size[2]), (*C.char)(unsafe.Pointer(&data[0]))); p != nil {
 		return &TextureBuffer{m: p}
+	}
+	return nil
+}
+
+func NewTextureBufferWithImage(t interface{}) *TextureBuffer {
+	switch img := t.(type) {
+	case *image.NRGBA:
+		return NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
+	case *image.RGBA:
+		return NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
+	case *image.Gray:
+		return NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(1)}, img.Pix)
 	}
 	return nil
 }
