@@ -123,6 +123,13 @@ type RawMesh struct {
 	m *C.struct__i3s_raw_mesh_t
 }
 
+func NewRawMesh() *RawMesh {
+	if p := C.raw_mesh_create(); p != nil {
+		return &RawMesh{m: p}
+	}
+	return nil
+}
+
 func (n *RawMesh) Free() {
 	C.raw_mesh_free(n.m)
 	n.m = nil
@@ -149,6 +156,13 @@ func (n *RawMesh) SetTextureImage(t interface{}) {
 
 type RawPoints struct {
 	m *C.struct__i3s_raw_points_t
+}
+
+func NewRawPoints() *RawPoints {
+	if p := C.raw_points_create(); p != nil {
+		return &RawPoints{m: p}
+	}
+	return nil
 }
 
 func (n *RawPoints) Free() {
@@ -370,14 +384,14 @@ func (n *LayerWriter) Save() {
 	C.layer_writer_save(n.m)
 }
 
-func CreateDefaultWriter(name string, slpkPath string, wkid int32) *LayerWriter {
+func CreateDefaultWriter(name string, slpkPath string) *LayerWriter {
 	ctx := NewCtxProperties()
 	writer_context := NewWriterContext(ctx)
 	meta := NewLayerMeta()
 	meta.SetType(LT_MESHIM)
 	meta.SetName(name)
 	meta.SetDesc("Generated with flywave")
-	meta.SetSpatialReferenceWkid(wkid)
+	meta.SetSpatialReferenceWkid(3857)
 	meta.SetUID(name)
 	meta.SetNormalReferenceFrame(NRF_NOT_SET)
 
