@@ -480,14 +480,14 @@ bool process(
   const Vec2d& cell_size,
   const std::vector<std::vector<double>>& grids,
   const std::vector<std::vector<char>>& textures,
-  int node_tris_size,
-  int node_texture_size,
-  int depth,
-  int grid_size,
-  const Vec2i& start,
-  int texture_size,
-  const Vec2i& texture_start,
-  i3slib::i3s::Node_id& node_id,
+  int node_tris_size, //32
+  int node_texture_size, //128
+  int depth, //0
+  int grid_size, //32
+  const Vec2i& start, //{0,0}
+  int texture_size,//128
+  const Vec2i& texture_start, //{0,0}
+  i3slib::i3s::Node_id& node_id, //0
   CS_transformation* transformation = nullptr)
 {
   std::vector<i3slib::i3s::Node_id> node_ids;

@@ -384,11 +384,11 @@ func (n *LayerWriter) Save() {
 	C.layer_writer_save(n.m)
 }
 
-func CreateDefaultWriter(name string, slpkPath string) *LayerWriter {
+func CreateDefaultWriter(lt LayerType, name string, slpkPath string) *LayerWriter {
 	ctx := NewCtxProperties()
 	writer_context := NewWriterContext(ctx)
 	meta := NewLayerMeta()
-	meta.SetType(LT_MESHIM)
+	meta.SetType(lt)
 	meta.SetName(name)
 	meta.SetDesc("Generated with flywave")
 	meta.SetSpatialReferenceWkid(3857)
