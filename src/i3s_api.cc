@@ -10,6 +10,7 @@
 #include <utils/utl_i3s_resource_defines.h>
 #include <utils/utl_lock.h>
 #include <utils/utl_slpk_writer_api.h>
+#include <utils/utl_colors.h.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -356,6 +357,16 @@ FLYWAVE_I3S_API void mesh_data_free(i3s_mesh_data_t *md) {
 FLYWAVE_I3S_API i3s_material_data_t *
 mesh_data_get_material(i3s_mesh_data_t *md) {
   return new i3s_material_data_t{&md->data->material};
+}
+
+
+FLYWAVE_I3S_API void
+mesh_data_set_color(i3s_mesh_data_t *md,char *cl,size_t count){
+  i3slib::i3s::Mesh_attrb<i3slib::utils::Rgba8> colors;
+  auto color_values = i3slib::utl::Buffer::create_writable_typed_view<i3slib::utl::Rgba8>(count/4);
+  memcpy(color_values.data(),cl,count)
+  colors.values = color_values;
+  md->data->set_colors(colors);
 }
 
 FLYWAVE_I3S_API void material_data_free(i3s_material_data_t *md) {

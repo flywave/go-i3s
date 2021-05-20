@@ -142,6 +142,7 @@ public:
   virtual bool                               create_normals(const i3s::Mesh_attrb< utl::Vec3f>& rel_positions) override;
   virtual const Mesh_attrb<utl::Vec2f>&      get_uvs(int uvset) const override { return m_uvs; }
   virtual const Mesh_attrb<Rgba8>&      get_colors() const override { return m_colors; };
+  virtual void  set_colors(const Mesh_attrb<Rgba8>& cl)  override {   m_colors = cl; };
   virtual const Mesh_attrb<Uv_region>&  get_regions() const override { return m_uv_region; }
   virtual const Mesh_attrb<uint32_t>&            get_feature_ids() const override { return m_fids; }
 

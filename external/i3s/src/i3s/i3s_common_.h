@@ -97,6 +97,7 @@ public:
   virtual bool                           create_normals(const i3s::Mesh_attrb< utl::Vec3f>& rel_positions) =0;
   virtual const Mesh_attrb<utl::Vec2f>&  get_uvs(int uvset) const = 0;
   virtual const Mesh_attrb<Rgba8>&  get_colors() const = 0;
+  virtual void  set_colors(const Mesh_attrb<Rgba8>&){};
   virtual const Mesh_attrb<Uv_region>&  get_regions() const = 0;
   virtual const Mesh_attrb<uint32_t>&        get_feature_ids() const = 0;
   virtual const utl::Buffer_view<utl::Vec3d>&     get_absolute_positions() const =0;

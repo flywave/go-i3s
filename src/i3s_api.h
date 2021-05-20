@@ -152,6 +152,9 @@ FLYWAVE_I3S_API void mesh_data_free(i3s_mesh_data_t *md);
 FLYWAVE_I3S_API i3s_material_data_t *
 mesh_data_get_material(i3s_mesh_data_t *md);
 
+FLYWAVE_I3S_API void
+mesh_data_gset_color(i3s_mesh_data_t *md,char *cl,size_t count);
+
 FLYWAVE_I3S_API void material_data_free(i3s_material_data_t *md);
 FLYWAVE_I3S_API void
 material_data_set_material_properties_alpha_mode(i3s_material_data_t *md,
