@@ -387,18 +387,20 @@ func (n *LayerWriter) Save() {
 func CreateDefaultWriter(lt LayerType, name string, slpkPath string) *LayerWriter {
 	ctx := NewCtxProperties()
 	writer_context := NewWriterContext(ctx)
+	writer := NewLayerWriter(writer_context, slpkPath)
+	writer.SetLayerMeta(GetMeatWithType(lt, name))
+	return writer
+}
+
+func GetMeatWithType(layerType LayerType, name string) *LayerMeta {
 	meta := NewLayerMeta()
-	meta.SetType(lt)
+	meta.SetType(layerType)
 	meta.SetName(name)
 	meta.SetDesc("Generated with flywave")
 	meta.SetSpatialReferenceWkid(3857)
 	meta.SetUID(name)
 	meta.SetNormalReferenceFrame(NRF_NOT_SET)
-
-	writer := NewLayerWriter(writer_context, slpkPath)
-
-	writer.SetLayerMeta(meta)
-	return writer
+	return meta
 }
 
 type CreateFlags C.uint
