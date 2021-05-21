@@ -386,7 +386,9 @@ func (n *LayerWriter) Save() {
 
 func CreateDefaultWriter(lt LayerType, name string, slpkPath string) *LayerWriter {
 	ctx := NewCtxProperties()
+	defer ctx.Free()
 	writer_context := NewWriterContext(ctx)
+	defer writer_context.Free()
 	writer := NewLayerWriter(writer_context, slpkPath)
 	writer.SetLayerMeta(GetMeatWithType(lt, name))
 	return writer
