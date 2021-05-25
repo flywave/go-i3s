@@ -3,8 +3,8 @@ package i3s
 // #include <stdlib.h>
 // #include <string.h>
 // #include "i3s_api.h"
-// #cgo CFLAGS: -I ./lib
-// #cgo CXXFLAGS: -I ./lib
+// #cgo CFLAGS: -I ./  -I ./lib
+// #cgo CXXFLAGS: -I ./ -I ./lib
 // #cgo linux LDFLAGS:  -L ./lib -L /usr/lib/x86_64-linux-gnu -Wl,--start-group  -lstdc++ -lm -pthread -ldl -lci3s -lzlib -ldraco -li3s -ljpeg -llepcc -lpng -lEtcLib -Wl,--end-group
 // #cgo windows LDFLAGS: -L ./lib　-lci3s -lzlib -ldraco -li3s -ljpeg -llepcc -lpng -lEtcLib
 // #cgo darwin LDFLAGS: -L　./lib -lci3s -lzlib -ldraco -li3s -ljpeg -llepcc -lpng -lEtcLib
