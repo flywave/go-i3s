@@ -7,6 +7,7 @@ package i3s
 import "C"
 import (
 	"image"
+	"runtime"
 	"unsafe"
 )
 
@@ -22,31 +23,41 @@ func NewTextureBuffer(size []int32, data []uint8) *TextureBuffer {
 }
 
 func NewTextureBufferWithImage(t interface{}) *TextureBuffer {
+	var res *TextureBuffer
 	switch img := t.(type) {
 	case *image.NRGBA:
-		return NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
+		res = NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
 	case *image.RGBA:
-		return NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
+		res = NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(4)}, img.Pix)
 	case *image.Gray:
-		return NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(1)}, img.Pix)
+		res = NewTextureBuffer([]int32{int32(img.Rect.Dx()), int32(img.Rect.Dy()), int32(1)}, img.Pix)
 	}
-	return nil
+	if res != nil {
+		runtime.SetFinalizer(res, (*TextureBuffer).free)
+	}
+	return res
 }
 
-func (n *TextureBuffer) Free() {
+func (n *TextureBuffer) free() {
 	C.texture_buffer_free(n.m)
 	n.m = nil
 }
 
 func (n *TextureBuffer) GetMeta() *TextureMeta {
-	return &TextureMeta{m: C.texture_buffer_get_meta(n.m)}
+	return NewTextureMeta(C.texture_buffer_get_meta(n.m))
 }
 
 type TextureMeta struct {
 	m *C.struct__i3s_texture_meta_t
 }
 
-func (n *TextureMeta) Free() {
+func NewTextureMeta(m *C.struct__i3s_texture_meta_t) *TextureMeta {
+	t := &TextureMeta{m: m}
+	runtime.SetFinalizer(t, (*TextureMeta).free)
+	return t
+}
+
+func (n *TextureMeta) free() {
 	C.texture_meta_free(n.m)
 	n.m = nil
 }

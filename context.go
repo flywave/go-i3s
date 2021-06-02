@@ -5,6 +5,7 @@ package i3s
 // #cgo CFLAGS: -I ./lib
 // #cgo CXXFLAGS: -I ./lib
 import "C"
+import "runtime"
 
 type CtxProperties struct {
 	m *C.struct__i3s_ctx_properties_t
@@ -12,12 +13,14 @@ type CtxProperties struct {
 
 func NewCtxProperties() *CtxProperties {
 	if p := C.ctx_properties_create(); p != nil {
-		return &CtxProperties{m: p}
+		c := &CtxProperties{m: p}
+		runtime.SetFinalizer(c, (*CtxProperties).free)
+		return c
 	}
 	return nil
 }
 
-func (n *CtxProperties) Free() {
+func (n *CtxProperties) free() {
 	C.ctx_properties_free(n.m)
 	n.m = nil
 }

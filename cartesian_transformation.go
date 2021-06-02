@@ -7,6 +7,7 @@ package i3s
 import "C"
 import (
 	"reflect"
+	"runtime"
 	"unsafe"
 )
 
@@ -14,7 +15,13 @@ type SpatialReference struct {
 	m *C.struct__i3s_spatial_reference_t
 }
 
-func (n *SpatialReference) Free() {
+func NewSpatialReference(m *C.struct__i3s_spatial_reference_t) *SpatialReference {
+	mh := &SpatialReference{m: m}
+	runtime.SetFinalizer(mh, (*SpatialReference).free)
+	return mh
+}
+
+func (n *SpatialReference) free() {
 	C.spatial_reference_free(n.m)
 	n.m = nil
 }
@@ -70,7 +77,7 @@ func toCartesian(ctx unsafe.Pointer, sr *C.struct__i3s_spatial_reference_t, xyz 
 	cpointsHeader.Cap = int(count)
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(xyz))
-	return C.bool((*CartesianTransformation)(unsafe.Pointer(*((*uintptr)(ctx)))).toCartesian(&SpatialReference{m: sr}, cpointsSlice))
+	return C.bool((*CartesianTransformation)(unsafe.Pointer(*((*uintptr)(ctx)))).toCartesian(NewSpatialReference(sr), cpointsSlice))
 }
 
 //export fromCartesian
@@ -81,5 +88,5 @@ func fromCartesian(ctx unsafe.Pointer, sr *C.struct__i3s_spatial_reference_t, xy
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(xyz))
 
-	return C.bool((*CartesianTransformation)(unsafe.Pointer(*((*uintptr)(ctx)))).fromCartesian(&SpatialReference{m: sr}, cpointsSlice))
+	return C.bool((*CartesianTransformation)(unsafe.Pointer(*((*uintptr)(ctx)))).fromCartesian(NewSpatialReference(sr), cpointsSlice))
 }

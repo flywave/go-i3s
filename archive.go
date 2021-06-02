@@ -12,6 +12,7 @@ import "C"
 import (
 	"image"
 	"reflect"
+	"runtime"
 	"unsafe"
 )
 
@@ -87,12 +88,14 @@ type NodeData struct {
 
 func NewNodeData() *NodeData {
 	if p := C.node_data_create(); p != nil {
-		return &NodeData{m: p}
+		n := &NodeData{m: p}
+		runtime.SetFinalizer(n, (*NodeData).free)
+		return n
 	}
 	return nil
 }
 
-func (n *NodeData) Free() {
+func (n *NodeData) free() {
 	C.node_data_free(n.m)
 	n.m = nil
 }
@@ -125,12 +128,14 @@ type RawMesh struct {
 
 func NewRawMesh() *RawMesh {
 	if p := C.raw_mesh_create(); p != nil {
-		return &RawMesh{m: p}
+		mh := &RawMesh{m: p}
+		runtime.SetFinalizer(mh, (*RawMesh).free)
+		return mh
 	}
 	return nil
 }
 
-func (n *RawMesh) Free() {
+func (n *RawMesh) free() {
 	C.raw_mesh_free(n.m)
 	n.m = nil
 }
@@ -160,12 +165,14 @@ type RawPoints struct {
 
 func NewRawPoints() *RawPoints {
 	if p := C.raw_points_create(); p != nil {
-		return &RawPoints{m: p}
+		mh := &RawPoints{m: p}
+		runtime.SetFinalizer(mh, (*RawPoints).free)
+		return mh
 	}
 	return nil
 }
 
-func (n *RawPoints) Free() {
+func (n *RawPoints) free() {
 	C.raw_points_free(n.m)
 	n.m = nil
 }
@@ -184,19 +191,23 @@ type WriterContext struct {
 
 func NewWriterContext(prop *CtxProperties) *WriterContext {
 	if p := C.writer_context_create(prop.m, nil); p != nil {
-		return &WriterContext{m: p}
+		mh := &WriterContext{m: p}
+		runtime.SetFinalizer(mh, (*WriterContext).free)
+		return mh
 	}
 	return nil
 }
 
 func NewWriterContextWithCartesianTransformation(prop *CtxProperties, tran *CartesianTransformation) *WriterContext {
 	if p := C.writer_context_create(prop.m, tran.m); p != nil {
-		return &WriterContext{m: p}
+		mh := &WriterContext{m: p}
+		runtime.SetFinalizer(mh, (*WriterContext).free)
+		return mh
 	}
 	return nil
 }
 
-func (n *WriterContext) Free() {
+func (n *WriterContext) free() {
 	C.writer_context_free(n.m)
 	n.m = nil
 }
@@ -207,12 +218,14 @@ type LayerMeta struct {
 
 func NewLayerMeta() *LayerMeta {
 	if p := C.layer_meta_create(); p != nil {
-		return &LayerMeta{m: p}
+		mh := &LayerMeta{m: p}
+		runtime.SetFinalizer(mh, (*LayerMeta).free)
+		return mh
 	}
 	return nil
 }
 
-func (n *LayerMeta) Free() {
+func (n *LayerMeta) free() {
 	C.layer_meta_free(n.m)
 	n.m = nil
 }
@@ -311,7 +324,13 @@ type AttributeMeta struct {
 	m *C.struct__i3s_attribute_meta_t
 }
 
-func (n *AttributeMeta) Free() {
+func NewAttributeMeta(p *C.struct__i3s_attribute_meta_t) *AttributeMeta {
+	mh := &AttributeMeta{m: p}
+	runtime.SetFinalizer(mh, (*AttributeMeta).free)
+	return mh
+}
+
+func (n *AttributeMeta) free() {
 	C.attribute_meta_free(n.m)
 	n.m = nil
 }
@@ -338,7 +357,7 @@ type LayerWriter struct {
 	m *C.struct__i3s_layer_writer_t
 }
 
-func (n *LayerWriter) Free() {
+func (n *LayerWriter) free() {
 	C.layer_writer_free(n.m)
 	n.m = nil
 }
@@ -347,7 +366,9 @@ func NewLayerWriter(ctx *WriterContext, path string) *LayerWriter {
 	cpath := C.CString(path)
 	defer C.free(unsafe.Pointer(cpath))
 	if p := C.layer_writer_create(ctx.m, cpath); p != nil {
-		return &LayerWriter{m: p}
+		mh := &LayerWriter{m: p}
+		runtime.SetFinalizer(mh, (*LayerWriter).free)
+		return mh
 	}
 	return nil
 }
@@ -386,9 +407,7 @@ func (n *LayerWriter) Save() {
 
 func CreateDefaultWriter(lt LayerType, name string, slpkPath string) *LayerWriter {
 	ctx := NewCtxProperties()
-	defer ctx.Free()
 	writer_context := NewWriterContext(ctx)
-	defer writer_context.Free()
 	writer := NewLayerWriter(writer_context, slpkPath)
 	writer.SetLayerMeta(GetMeatWithType(lt, name))
 	return writer
@@ -456,9 +475,11 @@ type SlpkWriterAdapt struct {
 	w SlpkWriter
 }
 
-func (n *SlpkWriterAdapt) Free() {
-	C.slpk_writer_free(n.m)
-	n.m = nil
+func (n *SlpkWriterAdapt) free() {
+	if n.m != nil {
+		C.slpk_writer_free(n.m)
+		n.m = nil
+	}
 }
 
 //export createArchive
@@ -498,6 +519,7 @@ func NewSlpkWriterAdapt(ctx SlpkWriter) *SlpkWriterAdapt {
 
 	if p := C.slpk_writer_create((unsafe.Pointer)(&inptr)); p != nil {
 		ret.m = p
+		runtime.SetFinalizer(ret, (*SlpkWriterAdapt).free)
 		return ret
 	}
 	return nil

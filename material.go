@@ -5,13 +5,22 @@ package i3s
 // #cgo CFLAGS: -I ./lib
 // #cgo CXXFLAGS: -I ./lib
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type MaterialData struct {
 	m *C.struct__i3s_material_data_t
 }
 
-func (n *MaterialData) Free() {
+func NewMaterialData(m *C.struct__i3s_material_data_t) *MaterialData {
+	mh := &MaterialData{m: m}
+	runtime.SetFinalizer(mh, (*MaterialData).free)
+	return mh
+}
+
+func (n *MaterialData) free() {
 	C.material_data_free(n.m)
 	n.m = nil
 }
