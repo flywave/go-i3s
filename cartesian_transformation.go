@@ -47,16 +47,20 @@ func (n *SpatialReference) GetWKT() string {
 }
 
 type CartesianTransformation struct {
-	m    *C.struct__i3s_cartesian_transformation_t
+	m   *C.struct__i3s_cartesian_transformation_t
+	ptr *uintptr
+
 	to   func(sr *SpatialReference, xyz []C.float) bool
 	from func(sr *SpatialReference, xyz []C.float) bool
 }
 
 func NewCartesianTransformation(to func(sr *SpatialReference, xyz []C.float) bool, from func(sr *SpatialReference, xyz []C.float) bool) *CartesianTransformation {
 	ret := &CartesianTransformation{m: nil, to: to, from: from}
-	inptr := uintptr(unsafe.Pointer(ret))
-	if p := C.cartesian_transformation_create((unsafe.Pointer)(&inptr)); p != nil {
+	inptr := new(uintptr)
+	*inptr = uintptr(unsafe.Pointer(ret))
+	if p := C.cartesian_transformation_create((unsafe.Pointer)(inptr)); p != nil {
 		ret.m = p
+		ret.ptr = inptr
 		return ret
 	}
 	return nil

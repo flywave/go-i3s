@@ -26,7 +26,7 @@ func (n *Mesh) free() {
 }
 
 func (n *Mesh) GetMaterial() *MaterialData {
-	return &NewMaterialData(C.mesh_data_get_material(n.m))
+	return NewMaterialData(C.mesh_data_get_material(n.m))
 }
 
 func (n *Mesh) SetColor(c []byte) {

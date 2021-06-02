@@ -354,7 +354,8 @@ func (n *AttributeMeta) SetAlias(alias string) {
 }
 
 type LayerWriter struct {
-	m *C.struct__i3s_layer_writer_t
+	m   *C.struct__i3s_layer_writer_t
+	adp *SlpkWriterAdapt
 }
 
 func (n *LayerWriter) free() {
@@ -471,8 +472,9 @@ type SlpkWriter interface {
 }
 
 type SlpkWriterAdapt struct {
-	m *C.struct__i3s_slpk_writer_t
-	w SlpkWriter
+	m   *C.struct__i3s_slpk_writer_t
+	w   SlpkWriter
+	ptr *uintptr
 }
 
 func (n *SlpkWriterAdapt) free() {
@@ -494,7 +496,6 @@ func appendFile(ctx unsafe.Pointer, path *C.char, buf *C.uchar, count C.int, mim
 	cpointsHeader.Cap = int(count)
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(buf))
-
 	return C.bool((*(**SlpkWriterAdapt)(ctx)).w.AppendFile(C.GoString(path), cpointsSlice, MimeType(mimeType), MimeEncoding(pack)))
 }
 
@@ -515,10 +516,11 @@ func finalize(ctx unsafe.Pointer) C.bool {
 
 func NewSlpkWriterAdapt(ctx SlpkWriter) *SlpkWriterAdapt {
 	ret := &SlpkWriterAdapt{m: nil, w: ctx}
-	inptr := uintptr(unsafe.Pointer(ret))
-
-	if p := C.slpk_writer_create((unsafe.Pointer)(&inptr)); p != nil {
+	inptr := new(uintptr)
+	*inptr = uintptr(unsafe.Pointer(ret))
+	if p := C.slpk_writer_create((unsafe.Pointer)(inptr)); p != nil {
 		ret.m = p
+		ret.ptr = inptr
 		runtime.SetFinalizer(ret, (*SlpkWriterAdapt).free)
 		return ret
 	}
@@ -527,7 +529,7 @@ func NewSlpkWriterAdapt(ctx SlpkWriter) *SlpkWriterAdapt {
 
 func NewLayerWriterWithSlpkWriter(ctx *WriterContext, adapt *SlpkWriterAdapt) *LayerWriter {
 	if p := C.layer_writer_create_with_slpk_writer(ctx.m, adapt.m); p != nil {
-		return &LayerWriter{m: p}
+		return &LayerWriter{m: p, adp: adapt}
 	}
 	return nil
 }
