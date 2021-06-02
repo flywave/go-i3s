@@ -5,13 +5,22 @@ package i3s
 // #cgo CFLAGS: -I ./lib
 // #cgo CXXFLAGS: -I ./lib
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type Mesh struct {
 	m *C.struct__i3s_mesh_data_t
 }
 
-func (n *Mesh) Free() {
+func NewMesh(m *C.struct__i3s_mesh_data_t) *Mesh {
+	mh := &Mesh{m: m}
+	runtime.SetFinalizer(mh, (*Mesh).free)
+	return mh
+}
+
+func (n *Mesh) free() {
 	C.mesh_data_free(n.m)
 	n.m = nil
 }
@@ -21,5 +30,5 @@ func (n *Mesh) GetMaterial() *MaterialData {
 }
 
 func (n *Mesh) SetColor(c []byte) {
-	C.mesh_data_set_color(n.m, (*C.char)(unsafe.Pointer(&c[0])), C.int(len(c)))
+	C.mesh_data_set_color(n.m, (*C.char)(unsafe.Pointer(&c[0])), C.ulong(len(c)))
 }

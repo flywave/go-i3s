@@ -116,7 +116,7 @@ func (n *NodeData) SetChildrens(nodeIds []NodeID) {
 }
 
 func (n *NodeData) GetMeshData() *Mesh {
-	return &Mesh{m: C.node_data_get_mesh_data(n.m)}
+	return NewMesh(C.node_data_get_mesh_data(n.m))
 }
 
 type RawMesh struct {

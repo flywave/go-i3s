@@ -114,7 +114,8 @@ FLYWAVE_I3S_API void attribute_meta_set_alias(i3s_attribute_meta_t *nd,
 FLYWAVE_I3S_API i3s_layer_writer_t *
 layer_writer_create(i3s_writer_context_t *ctx, const char *path);
 FLYWAVE_I3S_API i3s_layer_writer_t *
-layer_writer_create_with_slpk_writer(i3s_writer_context_t *ctx, i3s_slpk_writer_t *writer);
+layer_writer_create_with_slpk_writer(i3s_writer_context_t *ctx,
+                                     i3s_slpk_writer_t *writer);
 FLYWAVE_I3S_API void layer_writer_free(i3s_layer_writer_t *nd);
 FLYWAVE_I3S_API void layer_writer_set_layer_meta(i3s_layer_writer_t *nd,
                                                  i3s_layer_meta_t *lm);
@@ -152,8 +153,8 @@ FLYWAVE_I3S_API void mesh_data_free(i3s_mesh_data_t *md);
 FLYWAVE_I3S_API i3s_material_data_t *
 mesh_data_get_material(i3s_mesh_data_t *md);
 
-FLYWAVE_I3S_API void
-mesh_data_gset_color(i3s_mesh_data_t *md,char *cl,size_t count);
+FLYWAVE_I3S_API void mesh_data_set_color(i3s_mesh_data_t *md, char *cl,
+                                         size_t count);
 
 FLYWAVE_I3S_API void material_data_free(i3s_material_data_t *md);
 FLYWAVE_I3S_API void
@@ -249,10 +250,8 @@ cartesian_transformation_create(void *ctx);
 FLYWAVE_I3S_API void
 cartesian_transformation_free(i3s_cartesian_transformation_t *nd);
 
-FLYWAVE_I3S_API i3s_slpk_writer_t *
-slpk_writer_create(void *ctx);
-FLYWAVE_I3S_API void
-slpk_writer_free(i3s_slpk_writer_t *nd);
+FLYWAVE_I3S_API i3s_slpk_writer_t *slpk_writer_create(void *ctx);
+FLYWAVE_I3S_API void slpk_writer_free(i3s_slpk_writer_t *nd);
 
 #ifdef __cplusplus
 }

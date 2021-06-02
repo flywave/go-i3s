@@ -70,8 +70,7 @@ func toCartesian(ctx unsafe.Pointer, sr *C.struct__i3s_spatial_reference_t, xyz 
 	cpointsHeader.Cap = int(count)
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(xyz))
-
-	return C.bool(*(**CartesianTransformation)(ctx).toCartesian(&SpatialReference{m: sr}, cpointsSlice))
+	return C.bool((*CartesianTransformation)(unsafe.Pointer(*((*uintptr)(ctx)))).toCartesian(&SpatialReference{m: sr}, cpointsSlice))
 }
 
 //export fromCartesian
@@ -82,5 +81,5 @@ func fromCartesian(ctx unsafe.Pointer, sr *C.struct__i3s_spatial_reference_t, xy
 	cpointsHeader.Len = int(count)
 	cpointsHeader.Data = uintptr(unsafe.Pointer(xyz))
 
-	return C.bool(*(**CartesianTransformation)(ctx).fromCartesian(&SpatialReference{m: sr}, cpointsSlice))
+	return C.bool((*CartesianTransformation)(unsafe.Pointer(*((*uintptr)(ctx)))).fromCartesian(&SpatialReference{m: sr}, cpointsSlice))
 }
