@@ -9,7 +9,5 @@ Session.vim
 build/
 release/
 debug/
-/libs/
-/lib/
 xcode_build/
 .vscode/
